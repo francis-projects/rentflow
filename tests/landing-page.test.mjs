@@ -25,3 +25,11 @@ test("marketing layout includes responsive breakpoints and reduced-motion suppor
   assert.match(css, /min-width:\s*1440px|max-width:\s*1440px/);
   assert.match(css, /prefers-reduced-motion/);
 });
+
+test("landing page includes entrance, scroll-stagger and dashboard motion", () => {
+  assert.match(page, /ScrollReveal><PricingSection/);
+  assert.match(css, /@keyframes hero-enter/);
+  assert.match(css, /@keyframes dashboard-float/);
+  assert.match(css, /\.scroll-reveal\.is-visible \.showcase-card/);
+  assert.match(css, /prefers-reduced-motion:reduce/);
+});
