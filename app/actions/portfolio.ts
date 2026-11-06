@@ -213,3 +213,27 @@ export async function removeOrganisationMember(data: FormData) {
   if(error) redirect("/team?error="+encodeURIComponent(error.message));
   revalidatePath("/team"); redirect("/team?success=Member%20removed%20from%20workspace");
 }
+
+
+export async function allocateExpenseToProperty(data: FormData) {
+ const {supabase,organization}=await getWorkspaceContext();
+ const expenseId=value(data,"expense_id"),propertyId=value(data,"property_id"),amount=number(data,"amount_minor");
+ if(!expenseId||!propertyId||!Number.isSafeInteger(amount)||amount<=0) redirect("/expenses?error=Enter%20a%20valid%20expense%20allocation");
+ const {error}=await supabase.from("expense_allocations").insert({organization_id:organization.id,expense_id:expenseId,property_id:propertyId,amount_minor:amount});
+ if(error) redirect("/expenses?error="+encodeURIComponent(error.message));
+ revalidatePath("/expenses"); revalidatePath("/owners"); revalidatePath("/reports");
+ redirect("/expenses?success=Expense%20allocated%20to%20property");
+}
+
+export async function recordOwnerPayout(data: FormData) {
+ const {supabase,organization,userId}=await getWorkspaceContext();
+ const ownerId=value(data,"owner_id"),propertyId=value(data,"property_id"),amount=number(data,"amount_minor"),paidOn=value(data,"paid_on");
+ const method=value(data,"payment_method");
+ if(!ownerId||!propertyId||!paidOn||!Number.isSafeInteger(amount)||amount<=0||!["cash","bank_transfer","mobile_money","cheque","other"].includes(method)) redirect("/owners?error=Complete%20the%20owner%20payout%20details");
+ const {data:ownership,error:ownershipError}=await supabase.from("property_owners").select("id").eq("organization_id",organization.id).eq("owner_id",ownerId).eq("property_id",propertyId).maybeSingle();
+ if(ownershipError||!ownership) redirect("/owners?error=The%20selected%20owner%20is%20not%20assigned%20to%20that%20property");
+ const {error}=await supabase.from("owner_payouts").insert({organization_id:organization.id,owner_id:ownerId,property_id:propertyId,amount_minor:amount,paid_on:paidOn,payment_method:method,reference:value(data,"reference")||null,notes:value(data,"notes")||null,recorded_by:userId});
+ if(error) redirect("/owners?error="+encodeURIComponent(error.message));
+ revalidatePath("/owners"); revalidatePath("/reports");
+ redirect("/owners?success=Owner%20payout%20recorded");
+}
