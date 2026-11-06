@@ -375,6 +375,75 @@ export type Database = {
           },
         ]
       }
+      organization_subscriptions: {
+        Row: {
+          billing_interval: string
+          cancelled_at: string | null
+          created_at: string
+          current_period_end: string | null
+          current_period_start: string
+          id: string
+          organization_id: string
+          plan_id: string
+          provider: string | null
+          provider_customer_id: string | null
+          provider_subscription_id: string | null
+          started_at: string
+          status: string
+          trial_ends_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          billing_interval?: string
+          cancelled_at?: string | null
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string
+          id?: string
+          organization_id: string
+          plan_id: string
+          provider?: string | null
+          provider_customer_id?: string | null
+          provider_subscription_id?: string | null
+          started_at?: string
+          status?: string
+          trial_ends_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          billing_interval?: string
+          cancelled_at?: string | null
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string
+          id?: string
+          organization_id?: string
+          plan_id?: string
+          provider?: string | null
+          provider_customer_id?: string | null
+          provider_subscription_id?: string | null
+          started_at?: string
+          status?: string
+          trial_ends_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_subscriptions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_subscriptions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organizations: {
         Row: {
           country_code: string
@@ -833,6 +902,111 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      subscription_change_requests: {
+        Row: {
+          billing_interval: string
+          created_at: string
+          id: string
+          notes: string | null
+          organization_id: string
+          requested_by: string
+          requested_plan_id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+        }
+        Insert: {
+          billing_interval?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          organization_id: string
+          requested_by: string
+          requested_plan_id: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+        }
+        Update: {
+          billing_interval?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          requested_by?: string
+          requested_plan_id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscription_change_requests_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscription_change_requests_requested_plan_id_fkey"
+            columns: ["requested_plan_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subscription_plans: {
+        Row: {
+          annual_price_minor: number | null
+          code: string
+          created_at: string
+          currency_code: string
+          description: string
+          features: Json
+          id: string
+          is_active: boolean
+          max_properties: number | null
+          max_team_members: number | null
+          max_units: number | null
+          monthly_price_minor: number | null
+          name: string
+          sort_order: number
+        }
+        Insert: {
+          annual_price_minor?: number | null
+          code: string
+          created_at?: string
+          currency_code?: string
+          description: string
+          features?: Json
+          id?: string
+          is_active?: boolean
+          max_properties?: number | null
+          max_team_members?: number | null
+          max_units?: number | null
+          monthly_price_minor?: number | null
+          name: string
+          sort_order?: number
+        }
+        Update: {
+          annual_price_minor?: number | null
+          code?: string
+          created_at?: string
+          currency_code?: string
+          description?: string
+          features?: Json
+          id?: string
+          is_active?: boolean
+          max_properties?: number | null
+          max_team_members?: number | null
+          max_units?: number | null
+          monthly_price_minor?: number | null
+          name?: string
+          sort_order?: number
+        }
+        Relationships: []
       }
       tenant_documents: {
         Row: {
