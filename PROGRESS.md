@@ -14,6 +14,8 @@ The exact Emilkowalski, Impeccable and Taste skills are not installed in this wo
 - **CI:** Added `npm test` before lint, typecheck and build.
 - **First CI result:** The initial page commit exposed a TypeScript prop mismatch (the component required fields the page did not select) and lint reported an obsolete pricing formatter plus a pre-existing unused inspection-evidence action import.
 - **Fixes made:** Narrowed the pricing component type to the selected fields; removed the obsolete formatter; restored the inspection evidence upload form so its server action is actually used.
-- **Latest checks:** Re-run pending on the latest commit; test/lint/typecheck/build not yet confirmed green for the final iteration commit.
-- **Completion estimate:** 65% (implementation and responsive CSS committed; browser verification at all target widths, Lighthouse and visual QA still required).
-- **Next:** Confirm the latest CI run is green, then ask the user to refresh the local page and share desktop/mobile screenshots for actual browser verification.
+- **Latest CI:** Passed on commit `1dbb9ab17db2953ab70430bce931fb6c7da97da7`: `npm test`, ESLint, TypeScript typecheck, Next.js production build and Supabase Preview check all green.
+- **Warnings:** ESLint completed successfully with no warnings on the latest commit. (The npm install step reports dependency audit/deprecation notices; these are not build warnings and were not auto-fixed because that could change dependencies outside this design iteration.)
+- **Not yet verified:** Actual browser rendering, image delivery, toggle interaction in a live browser, every navigation target, and 375px / 768px / 1440px screenshots. No Lighthouse run available from CI.
+- **Completion estimate:** 72% (code and CI quality are green; browser-based definition-of-done items remain open).
+- **Next:** User refreshes the local site and provides screenshots at 375px, 768px and desktop; verify visual behavior and adjust based on actual rendering.
