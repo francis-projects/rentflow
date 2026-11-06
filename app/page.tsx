@@ -1,4 +1,7 @@
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/server";
+
+const usd = (minor: number | null) => minor === null ? "Custom" : minor === 0 ? "$0" : "$" + new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(minor / 100);
 
 const features = [
   { number: "01", title: "Property & unit records", description: "Keep property details, rental units and occupancy information organised in one workspace." },
@@ -7,7 +10,11 @@ const features = [
   { number: "04", title: "Expenses & owner reports", description: "Record property expenses, allocate portfolio costs and prepare owner statements." },
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+  const supabase = await createClient();
+  const { data: plans } = await supabase.from("subscription_plans")
+    .select("code,name,monthly_price_minor,annual_price_minor,is_active,sort_order")
+    .eq("is_active", true).order("sort_order");
   return (
     <main className="landing-page">
       <header className="landing-nav">
@@ -81,10 +88,13 @@ export default function HomePage() {
       <section className="landing-plans" id="plans">
         <div><p className="landing-kicker">PLANS THAT CAN GROW WITH YOU</p><h2>Start simple.<br /><em>Choose more when you need it.</em></h2><p>Explore the available workspace tiers. Paid plan pricing and billing arrangements are currently being finalised.</p></div>
         <div className="landing-plan-list">
-          <div><strong>Free</strong><span>Get started with the essentials</span><b>UGX 0</b></div>
-          <div><strong>Starter</strong><span>For growing rental portfolios</span><b>Contact us</b></div>
-          <div><strong>Professional</strong><span>More capacity and advanced tools</span><b>Contact us</b></div>
-          <div><strong>Enterprise</strong><span>For larger property operations</span><b>Contact us</b></div>
+          {(plans ?? []).map((plan) => <div key={plan.code}>
+            <strong>{plan.name}</strong>
+            <span>{plan.code === "free" ? "Get started with the essentials" : plan.code === "starter" ? "For growing rental portfolios" : plan.code === "professional" ? "More capacity and advanced tools" : "For larger property operations"}</span>
+            <b>{plan.code === "enterprise" ? "Custom pricing" : `${usd(plan.monthly_price_minor)} / month`}</b>
+            {plan.code !== "free" && plan.code !== "enterprise" && <small>{usd(plan.annual_price_minor)} / year · save 2 months</small>}
+          </div>)}
+          <p className="muted">Annual plans are billed once per year. Prices are in USD.</p>
           <Link href="/signup" className="landing-primary-cta">Create your workspace <span aria-hidden="true">↗</span></Link>
         </div>
       </section>
