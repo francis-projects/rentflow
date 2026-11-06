@@ -1152,6 +1152,18 @@ export type Database = {
           },
         ]
       }
+      lease_inspections: {
+        Row: { completed: boolean; condition_notes: string; created_at: string; damage_notes: string; id: string; inspected_at: string; inspected_by: string; inspection_type: string; inventory_notes: string; lease_id: string; organization_id: string }
+        Insert: { completed?: boolean; condition_notes: string; created_at?: string; damage_notes?: string; id?: string; inspected_at?: string; inspected_by: string; inspection_type: string; inventory_notes?: string; lease_id: string; organization_id: string }
+        Update: { completed?: boolean; condition_notes?: string; created_at?: string; damage_notes?: string; id?: string; inspected_at?: string; inspected_by?: string; inspection_type?: string; inventory_notes?: string; lease_id?: string; organization_id?: string }
+        Relationships: [{ foreignKeyName: "lease_inspections_lease_id_organization_id_fkey"; columns: ["lease_id", "organization_id"]; isOneToOne: false; referencedRelation: "leases"; referencedColumns: ["id", "organization_id"] }, { foreignKeyName: "lease_inspections_organization_id_fkey"; columns: ["organization_id"]; isOneToOne: false; referencedRelation: "organizations"; referencedColumns: ["id"] }]
+      }
+      lease_inspection_evidence: {
+        Row: { caption: string; content_type: string; file_name: string; id: string; inspection_id: string; organization_id: string; size_bytes: number; storage_path: string; uploaded_at: string; uploaded_by: string }
+        Insert: { caption?: string; content_type: string; file_name: string; id?: string; inspection_id: string; organization_id: string; size_bytes: number; storage_path: string; uploaded_at?: string; uploaded_by: string }
+        Update: { caption?: string; content_type?: string; file_name?: string; id?: string; inspection_id?: string; organization_id?: string; size_bytes?: number; storage_path?: string; uploaded_at?: string; uploaded_by?: string }
+        Relationships: [{ foreignKeyName: "lease_inspection_evidence_inspection_id_organization_id_fkey"; columns: ["inspection_id", "organization_id"]; isOneToOne: false; referencedRelation: "lease_inspections"; referencedColumns: ["id", "organization_id"] }, { foreignKeyName: "lease_inspection_evidence_organization_id_fkey"; columns: ["organization_id"]; isOneToOne: false; referencedRelation: "organizations"; referencedColumns: ["id"] }]
+      }
       tenants: {
         Row: {
           created_at: string
