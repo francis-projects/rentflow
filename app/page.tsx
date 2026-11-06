@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { PricingSection } from "@/components/pricing-section";
+import { ScrollReveal } from "@/components/scroll-reveal";
 
 const usd = (minor: number | null) => minor === null ? "Custom" : minor === 0 ? "$0" : "$" + new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(minor / 100);
 
@@ -46,7 +48,7 @@ export default async function HomePage() {
           <div className="visual-welcome"><div><small>YOUR WORKSPACE</small><strong>Portfolio overview</strong></div><span className="visual-date">THIS MONTH</span></div>
           <div className="visual-metrics">
             <div><small>PROPERTIES</small><strong>—</strong><span>Track your portfolio</span></div>
-            <div><small>RENT COLLECTED</small><strong>UGX —</strong><span>Monitor payments</span></div>
+            <div><small>RENT COLLECTED</small><strong>USD —</strong><span>Monitor payments</span></div>
           </div>
           <div className="visual-ledger">
             <div className="visual-ledger-head"><strong>Rent ledger</strong><span>Illustrative preview</span></div>
@@ -63,7 +65,25 @@ export default async function HomePage() {
         <span>ONE WORKSPACE</span><b>Properties</b><i /> <b>Tenants</b><i /> <b>Leases</b><i /> <b>Rent</b><i /> <b>Expenses</b><i /> <b>Owner reporting</b>
       </section>
 
-      <section className="landing-section" id="features">
+      <ScrollReveal><section className="landing-showcase">
+        <div className="showcase-heading"><p className="landing-kicker">MADE FOR THE WAY YOU MANAGE</p><h2>Every property detail.<br /><em>Finally in one place.</em></h2></div>
+        <div className="showcase-grid">
+          <article className="showcase-card showcase-card-large">
+            <div className="showcase-image" role="img" aria-label="Modern residential property exterior" style={{backgroundImage:"url(https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1400&q=85)"}} />
+            <div><span>01 / YOUR PORTFOLIO</span><h3>See the whole picture.</h3><p>Properties, units and occupancy — organised together.</p></div>
+          </article>
+          <article className="showcase-card">
+            <div className="showcase-image" role="img" aria-label="Bright modern apartment interior" style={{backgroundImage:"url(https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1000&q=85)"}} />
+            <div><span>02 / YOUR TENANTS</span><h3>Keep every detail close.</h3><p>Leases, documents and tenant history in one workspace.</p></div>
+          </article>
+          <article className="showcase-card">
+            <div className="showcase-image" role="img" aria-label="Modern apartment building architecture" style={{backgroundImage:"url(https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1000&q=85)"}} />
+            <div><span>03 / YOUR NUMBERS</span><h3>Make decisions with clarity.</h3><p>Track collections, expenses and owner reporting.</p></div>
+          </article>
+        </div>
+      </section></ScrollReveal>
+
+      <ScrollReveal><section className="landing-section" id="features">
         <div className="landing-section-heading">
           <p className="landing-kicker">THE RENTFLOW WORKSPACE</p>
           <h2>Less scattered paperwork.<br /><em>More control of your portfolio.</em></h2>
@@ -74,36 +94,26 @@ export default async function HomePage() {
             <span>{feature.number}</span><h3>{feature.title}</h3><p>{feature.description}</p><div className="landing-feature-arrow">↗</div>
           </article>)}
         </div>
-      </section>
+      </section></ScrollReveal>
 
-      <section className="landing-how" id="how-it-works">
+      <ScrollReveal><section className="landing-how" id="how-it-works">
         <div><p className="landing-kicker">A CLEARER WAY TO WORK</p><h2>Start with the basics.<br /><em>Build as you grow.</em></h2></div>
         <div className="landing-steps">
           <div><b>1</b><section><strong>Create your workspace</strong><p>Set up your account and organise your rental business.</p></section></div>
           <div><b>2</b><section><strong>Add properties, units and tenants</strong><p>Bring your portfolio records into one place and create leases.</p></section></div>
           <div><b>3</b><section><strong>Manage rent and reporting</strong><p>Generate charges, record payments, track expenses and review statements.</p></section></div>
         </div>
-      </section>
+      </section></ScrollReveal>
 
-      <section className="landing-plans" id="plans">
-        <div><p className="landing-kicker">PLANS THAT CAN GROW WITH YOU</p><h2>Start simple.<br /><em>Choose more when you need it.</em></h2><p>Explore the available workspace tiers. Paid plan pricing and billing arrangements are currently being finalised.</p></div>
-        <div className="landing-plan-list">
-          {(plans ?? []).map((plan) => <div key={plan.code}>
-            <strong>{plan.name}</strong>
-            <span>{plan.code === "free" ? "Get started with the essentials" : plan.code === "starter" ? "For growing rental portfolios" : plan.code === "professional" ? "More capacity and advanced tools" : "For larger property operations"}</span>
-            <b>{plan.code === "enterprise" ? "Custom pricing" : `${usd(plan.monthly_price_minor)} / month`}</b>
-            {plan.code !== "free" && plan.code !== "enterprise" && <small>{usd(plan.annual_price_minor)} / year · save 2 months</small>}
-          </div>)}
-          <p className="muted">Annual plans are billed once per year. Prices are in USD.</p>
-          <Link href="/signup" className="landing-primary-cta">Create your workspace <span aria-hidden="true">↗</span></Link>
-        </div>
-      </section>
+      <PricingSection plans={plans ?? []} />
+
+
 
       <footer className="landing-footer">
         <Link href="/" className="landing-brand"><span className="brand-mark">R</span><span>rentflow</span></Link>
         <p>Clearer rental operations for property businesses.</p>
         <div><Link href="/login">Sign in</Link><Link href="/signup">Get started</Link></div>
-        <small>© {new Date().getFullYear()} RentFlow. All rights reserved.</small>
+        <small>© 2026 RentFlow. All rights reserved.</small>
       </footer>
     </main>
   );
