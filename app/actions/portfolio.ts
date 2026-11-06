@@ -153,6 +153,21 @@ export async function createMaintenanceRequest(data: FormData) {
 }
 
 
+
+export async function endLease(data: FormData) {
+ const {supabase,organization}=await getWorkspaceContext();
+ const leaseId=value(data,"lease_id");
+ if(!leaseId) redirect("/leases?error=Select%20a%20lease");
+ const {data:lease,error:readError}=await supabase.from("leases").select("id,unit_id,status,start_date").eq("id",leaseId).eq("organization_id",organization.id).maybeSingle();
+ if(readError||!lease) redirect("/leases?error=Lease%20not%20found");
+ if(lease.status!=="active") redirect("/leases?error=Only%20active%20leases%20can%20be%20ended");
+ const today=kampalaDate();
+ if(today<lease.start_date) redirect("/leases?error=Lease%20cannot%20end%20before%20its%20start%20date");
+ const {error}=await supabase.from("leases").update({status:"ended",end_date:today}).eq("id",leaseId).eq("organization_id",organization.id);
+ if(error) redirect("/leases?error="+encodeURIComponent(error.message));
+ revalidatePath("/leases");revalidatePath("/properties");revalidatePath("/rent");redirect("/leases?success=Lease%20ended.%20Review%20the%20deposit%20ledger%20before%20recording%20any%20refund.");
+}
+
 export async function recordSecurityDepositTransaction(data: FormData) {
   const {supabase,organization}=await getWorkspaceContext();
   const leaseId=value(data,"lease_id"),type=value(data,"transaction_type"),amount=number(data,"amount_minor"),description=value(data,"description");
