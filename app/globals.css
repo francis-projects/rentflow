@@ -113,3 +113,26 @@
 .workspace-sidebar{transition:width .2s ease;min-width:0}.sidebar-brand-row{display:flex;align-items:center;justify-content:space-between;gap:8px}.sidebar-toggle{width:28px;height:28px;flex:0 0 28px;border:1px solid #e2e9e3;border-radius:7px;background:#fff;color:#176b4b;font-size:20px;line-height:1;cursor:pointer}.workspace-shell.sidebar-collapsed .workspace-sidebar{width:76px;padding-left:15px;padding-right:15px}.workspace-shell.sidebar-collapsed .sidebar-brand{justify-content:center}.workspace-shell.sidebar-collapsed .sidebar-brand-name,.workspace-shell.sidebar-collapsed .nav-caption,.workspace-shell.sidebar-collapsed .nav-link-label,.workspace-shell.sidebar-collapsed .sidebar-workspace-copy{display:none}.workspace-shell.sidebar-collapsed .sidebar-toggle{margin:auto}.workspace-shell.sidebar-collapsed .workspace-sidebar nav{display:grid;gap:7px}.workspace-shell.sidebar-collapsed .workspace-sidebar .nav-link{justify-content:center;padding:10px 5px}.nav-link-icon{display:none}.workspace-shell.sidebar-collapsed .nav-link-icon{display:inline-grid;place-items:center;width:25px;height:25px;border-radius:7px;background:#edf5f0;color:#176b4b;font-weight:800}.workspace-shell.sidebar-collapsed .sidebar-bottom{justify-content:center}@media(max-width:650px){.workspace-shell.sidebar-collapsed .workspace-sidebar{width:100%;padding:15px 16px}.workspace-shell.sidebar-collapsed .sidebar-brand-name{display:inline}.workspace-shell.sidebar-collapsed .workspace-sidebar nav{display:flex;overflow-x:auto}.workspace-shell.sidebar-collapsed .workspace-sidebar .nav-link-label{display:inline}.workspace-shell.sidebar-collapsed .nav-link-icon{display:none}}
 
 .maintenance-cost-form{min-width:235px;gap:8px}.maintenance-cost-form label{font-size:10px}.maintenance-cost-form input,.maintenance-cost-form select{padding:8px;font-size:11px}.maintenance-cost-form .checkbox-label{display:flex;align-items:center;gap:7px}.maintenance-cost-form .checkbox-label input{width:auto}.data-form .searchable-select{min-width:0}
+
+
+.plan-annual-price {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  margin: -0.35rem 0 1.1rem;
+  color: var(--text-secondary, #64748b);
+  font-size: 0.9rem;
+}
+.plan-annual-price strong {
+  color: var(--text-primary, #172033);
+  font-size: 0.95rem;
+}
+.plan-annual-price small {
+  font-size: 0.78rem;
+}
+.landing-plan-list > div > small {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.78rem;
+  color: var(--text-secondary, #64748b);
+}
