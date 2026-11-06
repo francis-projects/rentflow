@@ -1,34 +1,24 @@
-import { redirect } from "next/navigation";
-import { signOut } from "@/app/actions/auth";
-import { createClient } from "@/lib/supabase/server";
+import { getWorkspaceContext } from "@/lib/rentflow/context";
+import { WorkspaceLayout } from "@/components/workspace-layout";
 
 export default async function DashboardPage() {
-  const supabase = await createClient();
-  const { data: claimsData } = await supabase.auth.getClaims();
-  const userId = claimsData?.claims?.sub;
-  if (!userId) redirect("/login");
-
-  const [{ data: membership }, { data: userData }] = await Promise.all([
-    supabase.from("organization_members").select("organization_id, role").eq("user_id", userId).limit(1).maybeSingle(),
-    supabase.auth.getUser(),
-  ]);
-
-  let organizationName = "Your workspace";
-  if (membership?.organization_id) {
-    const { data } = await supabase.from("organizations").select("name").eq("id", membership.organization_id).maybeSingle();
-    if (data?.name) organizationName = data.name;
-  }
-
-  return <main className="dashboard-shell">
-    <header className="dashboard-topbar"><a className="auth-brand" href="/"><span className="brand-mark">R</span> rentflow</a><form action={signOut}><button className="signout-button">Sign out</button></form></header>
-    <section className="dashboard-content">
-      <p className="eyebrow">WORKSPACE OVERVIEW</p>
-      <h1>Welcome to RentFlow{userData.user?.user_metadata?.full_name ? `, ${userData.user.user_metadata.full_name}` : ""}.</h1>
-      <p className="auth-subtitle">{organizationName} · {membership?.role ?? "Member"}</p>
-      <div className="notice"><strong>Your workspace is ready for setup</strong><p>Your account is authenticated. Next we'll add property registration, rental units, tenants and lease management.</p></div>
-      <div className="metric-grid">
-        {[["Properties","—"],["Rental units","—"],["Active tenants","—"],["Outstanding rent","UGX —"]].map(([label,value])=><article className="metric-card" key={label}><p>{label}</p><strong>{value}</strong><small>Portfolio data will appear here</small></article>)}
-      </div>
-    </section>
-  </main>;
+ const {supabase,organization}=await getWorkspaceContext();
+ const month=new Date(); const start=new Date(Date.UTC(month.getUTCFullYear(),month.getUTCMonth(),1)).toISOString().slice(0,10);
+ const [{count:propertyCount},{count:unitCount},{count:tenantCount},{data:charges},{data:payments},{data:expensesList}] = await Promise.all([
+  supabase.from("properties").select("*",{count:"exact",head:true}).eq("organization_id",organization.id).is("archived_at",null),
+  supabase.from("units").select("*",{count:"exact",head:true}).eq("organization_id",organization.id),
+  supabase.from("tenants").select("*",{count:"exact",head:true}).eq("organization_id",organization.id),
+  supabase.from("rent_charges").select("id,amount_minor,status").eq("organization_id",organization.id),
+  supabase.from("payments").select("amount_minor,received_at,status").eq("organization_id",organization.id).gte("received_at",start),
+  supabase.from("expenses").select("amount_minor").eq("organization_id",organization.id).gte("incurred_on",start)
+ ]);
+ const collected=(payments??[]).filter(p=>p.status==="posted").reduce((sum,p)=>sum+Number(p.amount_minor),0);
+ const charged=(charges??[]).filter(c=>c.status!=="void").reduce((sum,c)=>sum+Number(c.amount_minor),0);
+ const paid=(charges??[]).filter(c=>c.status!=="void").reduce((sum,c)=>sum+0,0);
+ const outstanding=(charges??[]).filter(c=>c.status!=="paid"&&c.status!=="void").reduce((sum,c)=>sum+Number(c.amount_minor),0);
+ const expenseTotal=(expensesList??[]).reduce((sum,e)=>sum+Number(e.amount_minor),0);
+ return <WorkspaceLayout workspaceName={organization.name}><div className="page-heading"><div><p className="eyebrow">RENTAL OPERATIONS</p><h1>Portfolio overview</h1><p className="muted">A live summary of your properties, tenants and rental finances.</p></div></div>
+ <div className="metric-grid"><article className="metric-card"><p>Properties</p><strong>{propertyCount??0}</strong><small>Active property records</small></article><article className="metric-card"><p>Rental units</p><strong>{unitCount??0}</strong><small>Across your portfolio</small></article><article className="metric-card"><p>Tenants</p><strong>{tenantCount??0}</strong><small>Registered tenant records</small></article><article className="metric-card"><p>Rent collected this month</p><strong>UGX {collected.toLocaleString("en-UG")}</strong><small>Posted payments received</small></article><article className="metric-card"><p>Outstanding charges</p><strong>UGX {outstanding.toLocaleString("en-UG")}</strong><small>Unpaid charge face value; see ledger for allocations</small></article><article className="metric-card"><p>Expenses this month</p><strong>UGX {expenseTotal.toLocaleString("en-UG")}</strong><small>Recorded expenses</small></article></div>
+ <section className="panel dashboard-callout"><h2>Continue setting up your portfolio</h2><p>Start by registering your properties and units, then add tenants and create leases. Once leases are active, generate rent charges and record payments.</p><div className="quick-links"><a href="/properties">Add properties</a><a href="/tenants">Register tenants</a><a href="/leases">Create leases</a><a href="/rent">Open rent ledger</a></div></section>
+ </WorkspaceLayout>;
 }
