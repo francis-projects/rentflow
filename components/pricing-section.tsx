@@ -47,7 +47,7 @@ export function PricingSection({ plans }: { plans: Plan[] }) {
         <div className="billing-switch-wrap">
           <div className="billing-switch" role="group" aria-label="Choose billing interval">
             <button type="button" aria-pressed={interval === "monthly"} className={interval === "monthly" ? "is-active" : ""} onClick={() => setInterval("monthly")}>Monthly</button>
-            <button type="button" aria-pressed={interval === "annual"} className={interval === "annual" ? "is-active" : ""} onClick={() => setInterval("annual")}>Annual <span>Save 2 months</span></button>
+            <button type="button" aria-pressed={interval === "annual"} className={interval === "annual" ? "is-active" : ""} onClick={() => setInterval("annual")}>Annual <span>Discount</span></button>
           </div>
           <small>All prices in USD · Annual plans are billed yearly</small>
         </div>
@@ -59,17 +59,20 @@ export function PricingSection({ plans }: { plans: Plan[] }) {
           const monthlyEquivalent = interval === "annual" && price !== null && price > 0 ? price / 12 : null;
           const saving = plan.monthly_price_minor !== null && plan.annual_price_minor !== null
             ? plan.monthly_price_minor * 12 - plan.annual_price_minor : 0;
+          const discountPercent = plan.monthly_price_minor !== null && plan.monthly_price_minor > 0
+            && plan.annual_price_minor !== null && saving > 0
+            ? Math.round((saving / (plan.monthly_price_minor * 12)) * 100) : 0;
           return (
             <article className={`pricing-card ${plan.code === "professional" ? "pricing-card-featured" : ""}`} key={plan.code}>
               {plan.code === "professional" && <span className="pricing-popular">MOST POPULAR</span>}
               <div className="pricing-card-title"><span>{plan.name}</span><span className="pricing-plan-mark">{plan.code === "enterprise" ? "↗" : plan.code === "free" ? "○" : "✳"}</span></div>
               <p>{descriptions[plan.code] ?? "A flexible plan for your rental business."}</p>
-              <div className="pricing-amount">
+              <div className="pricing-amount" aria-live="polite" aria-atomic="true">
                 <strong>{custom ? "Let's talk" : formatUsd(price)}</strong>
                 {!custom && <span>/{interval === "annual" ? "year" : "month"}</span>}
               </div>
               {monthlyEquivalent !== null && <small className="pricing-equivalent">{formatUsd(Math.round(monthlyEquivalent))} per month, billed annually</small>}
-              {interval === "annual" && saving > 0 && <small className="pricing-saving">You save {formatUsd(saving)} each year</small>}
+              {interval === "annual" && saving > 0 && <small className="pricing-saving">You save {formatUsd(saving)} each year ({discountPercent}% off)</small>}
               <Link className={plan.code === "professional" ? "pricing-cta pricing-cta-solid" : "pricing-cta"} href="/signup">
                 {plan.code === "free" ? "Get started free" : plan.code === "enterprise" ? "Talk to our team" : "Choose " + plan.name}
                 <span aria-hidden="true">↗</span>
