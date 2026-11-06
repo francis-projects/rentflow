@@ -20,7 +20,8 @@ create index if not exists notifications_org_created_idx
   on public.notifications (organization_id, created_at desc);
 
 alter table public.notifications enable row level security;
-grant select, update on public.notifications to authenticated;
+grant select on public.notifications to authenticated;
+grant update (read_at) on public.notifications to authenticated;
 
 create policy "Users can view their own notifications"
   on public.notifications for select to authenticated
