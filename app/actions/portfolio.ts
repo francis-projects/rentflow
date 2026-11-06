@@ -67,7 +67,7 @@ export async function createLease(data: FormData) {
   const {supabase,organization}=await getWorkspaceContext();
   const rent=number(data,"rent_amount"), deposit=number(data,"deposit_amount");
   const payload={organization_id:organization.id,unit_id:value(data,"unit_id"),tenant_id:value(data,"tenant_id"),lease_reference:value(data,"lease_reference")||null,start_date:value(data,"start_date"),end_date:value(data,"end_date")||null,rent_amount_minor:rent,deposit_amount_minor:deposit,due_day:number(data,"due_day")||1,status:"active" as const,terms:value(data,"terms")||null};
-  if(!payload.unit_id||!payload.tenant_id||!payload.start_date||!Number.isSafeInteger(rent)||rent<0||!Number.isSafeInteger(deposit)||deposit<0) redirect("/leases?error=Complete%20the%20required%20lease%20details");
+  if(!payload.unit_id||!payload.tenant_id||!payload.start_date||!Number.isSafeInteger(rent)||rent<0||!Number.isSafeInteger(deposit)||deposit<0||deposit>rent) redirect("/leases?error=Complete%20the%20required%20lease%20details.%20The%20security%20deposit%20cannot%20exceed%20one%20month%20of%20rent.");
   const {error}=await supabase.from("leases").insert(payload);
   if(error) redirect("/leases?error="+encodeURIComponent(error.message));
   await supabase.from("units").update({status:"occupied"}).eq("id",payload.unit_id).eq("organization_id",organization.id);
