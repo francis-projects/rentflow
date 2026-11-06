@@ -4,7 +4,7 @@ import { requestPlanChange } from "@/app/actions/subscription";
 
 const featureLabels: Record<string,string> = {
  rent_ledger:"Rent ledger",tenant_documents:"Tenant document storage",maintenance:"Maintenance management",
- owner_statements:"Owner statements",financial_exports:"Financial exports",team_management:"Team management",
+ owner_statements:"Owner statements",owner_payouts:"Owner payout tracking",financial_exports:"Financial exports",team_management:"Team management",
  automated_reminders:"Automated rent reminders",ai_insights:"AI portfolio insights",priority_support:"Priority support"
 };
 const limitLabel=(value:number|null)=>value===null?"Unlimited":String(value);
