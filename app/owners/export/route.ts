@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getWorkspaceContext } from "@/lib/rentflow/context";
+import { getWorkspacePlan } from "@/lib/rentflow/entitlements";
 
 function csv(value: unknown) {
  const text=String(value??"");
@@ -8,6 +9,8 @@ function csv(value: unknown) {
 
 export async function GET() {
  const {supabase,organization}=await getWorkspaceContext();
+ const plan=await getWorkspacePlan(supabase,organization.id);
+ if((plan?.features as Record<string,unknown>|null)?.owner_statements!==true) return NextResponse.json({error:"Owner statements are not included in your current plan"},{status:403});
  const {data,error}=await supabase.from("owner_monthly_statements").select("*")
   .eq("organization_id",organization.id).order("statement_month",{ascending:false});
  if(error) return NextResponse.json({error:"Unable to export owner statements"},{status:500});
