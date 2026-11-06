@@ -7,6 +7,7 @@ import { getWorkspacePlan, requirePlanFeature } from "@/lib/rentflow/entitlement
 
 function value(data: FormData, key: string) { return String(data.get(key) ?? "").trim(); }
 function number(data: FormData, key: string) { return Number(value(data, key)); }
+function kampalaDate() { return new Intl.DateTimeFormat("en-CA", { timeZone: "Africa/Kampala", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date()); }
 
 export async function createProperty(data: FormData) {
   const { supabase, organization } = await getWorkspaceContext();
@@ -75,7 +76,7 @@ export async function createLease(data: FormData) {
 
 export async function generateRentCharges() {
   const {supabase,organization}=await getWorkspaceContext();
-  const period=new Date(); const month=period.toISOString().slice(0,10);
+  const month=kampalaDate();
   const {error}=await supabase.rpc("generate_monthly_rent_charges",{p_organization_id:organization.id,p_period:month});
   if(error) redirect("/rent?error="+encodeURIComponent(error.message));
   revalidatePath("/rent"); revalidatePath("/dashboard"); redirect("/rent?success=Rent%20charges%20generated");
