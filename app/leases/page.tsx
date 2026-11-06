@@ -8,6 +8,7 @@ export default async function LeasesPage({searchParams}:{searchParams:Promise<{e
   supabase.from("leases").select("*").eq("organization_id",organization.id).order("created_at",{ascending:false}),
   supabase.from("units").select("id,unit_code,property_id,status").eq("organization_id",organization.id).eq("status","vacant").order("unit_code"),
   supabase.from("tenants").select("id,full_name").eq("organization_id",organization.id).order("full_name"),
+  supabase.from("security_deposit_transactions").select("*").eq("organization_id",organization.id).order("created_at",{ascending:false}),
   searchParams
  ]);
  const {data:properties}=await supabase.from("properties").select("id,name").eq("organization_id",organization.id);
