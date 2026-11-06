@@ -26,6 +26,13 @@ test("marketing layout includes responsive breakpoints and reduced-motion suppor
   assert.match(css, /prefers-reduced-motion/);
 });
 
+test("annual discount messaging is calculated from database prices, not a fixed claim", () => {
+  const component = readFileSync(new URL("../components/pricing-section.tsx", import.meta.url), "utf8");
+  assert.doesNotMatch(component, /Save 2 months/);
+  assert.match(component, /monthly_price_minor\s*\*\s*12\s*-\s*plan\.annual_price_minor/);
+  assert.match(component, /aria-live="polite"/);
+});
+
 test("landing page includes entrance, scroll-stagger and dashboard motion", () => {
   assert.match(page, /ScrollReveal><PricingSection/);
   assert.match(css, /@keyframes hero-enter/);
