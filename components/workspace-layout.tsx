@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { signOut } from "@/app/actions/auth";
 
-const links=[["/dashboard","Overview"],["/properties","Properties & units"],["/owners","Property owners"],["/tenants","Tenants"],["/leases","Leases"],["/rent","Rent ledger"],["/expenses","Expenses"],["/maintenance","Maintenance"],["/reports","Reports"]];
+const links=[["/dashboard","Overview"],["/properties","Properties & units"],["/owners","Property owners"],["/tenants","Tenants"],["/leases","Leases"],["/rent","Rent ledger"],["/expenses","Expenses"],["/maintenance","Maintenance"],["/reports","Reports"],["/team","Team members"]];
 export function WorkspaceLayout({children,workspaceName}:{children:React.ReactNode;workspaceName:string}) {
  return <main className="workspace-shell">
   <aside className="workspace-sidebar">
