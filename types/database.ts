@@ -14,6 +14,55 @@ export type Database = {
   }
   public: {
     Tables: {
+      expense_allocations: {
+        Row: {
+          amount_minor: number
+          created_at: string
+          expense_id: string
+          id: string
+          organization_id: string
+          property_id: string
+        }
+        Insert: {
+          amount_minor: number
+          created_at?: string
+          expense_id: string
+          id?: string
+          organization_id: string
+          property_id: string
+        }
+        Update: {
+          amount_minor?: number
+          created_at?: string
+          expense_id?: string
+          id?: string
+          organization_id?: string
+          property_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "expense_allocations_expense_fk"
+            columns: ["expense_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "expenses"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "expense_allocations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expense_allocations_property_fk"
+            columns: ["property_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
       expenses: {
         Row: {
           amount_minor: number
@@ -297,6 +346,70 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      owner_payouts: {
+        Row: {
+          amount_minor: number
+          created_at: string
+          id: string
+          notes: string | null
+          organization_id: string
+          owner_id: string
+          paid_on: string
+          payment_method: string
+          property_id: string
+          recorded_by: string
+          reference: string | null
+        }
+        Insert: {
+          amount_minor: number
+          created_at?: string
+          id?: string
+          notes?: string | null
+          organization_id: string
+          owner_id: string
+          paid_on: string
+          payment_method: string
+          property_id: string
+          recorded_by: string
+          reference?: string | null
+        }
+        Update: {
+          amount_minor?: number
+          created_at?: string
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          owner_id?: string
+          paid_on?: string
+          payment_method?: string
+          property_id?: string
+          recorded_by?: string
+          reference?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "owner_payouts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_payouts_owner_fk"
+            columns: ["owner_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "owners"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "owner_payouts_property_fk"
+            columns: ["property_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
       }
       owners: {
         Row: {
@@ -861,6 +974,41 @@ export type Database = {
           },
           {
             foreignKeyName: "property_owners_property_id_organization_id_fkey"
+            columns: ["property_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
+      owner_payout_balances: {
+        Row: {
+          last_paid_on: string | null
+          organization_id: string | null
+          owner_id: string | null
+          owner_name: string | null
+          payout_count: number | null
+          property_id: string | null
+          property_name: string | null
+          total_paid_minor: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "owner_payouts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_payouts_owner_fk"
+            columns: ["owner_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "owners"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "owner_payouts_property_fk"
             columns: ["property_id", "organization_id"]
             isOneToOne: false
             referencedRelation: "properties"
