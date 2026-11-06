@@ -19,3 +19,10 @@ The exact Emilkowalski, Impeccable and Taste skills are not installed in this wo
 - **Not yet verified:** Actual browser rendering, image delivery, toggle interaction in a live browser, every navigation target, and 375px / 768px / 1440px screenshots. No Lighthouse run available from CI.
 - **Completion estimate:** 72% (code and CI quality are green; browser-based definition-of-done items remain open).
 - **Next:** User refreshes the local site and provides screenshots at 375px, 768px and desktop; verify visual behavior and adjust based on actual rendering.
+
+### Iteration 2 — 2026-11-06
+- **User feedback:** Supplied screenshots at 1440px, 768px and 375px. Desktop composition reads well; tablet and mobile collapse into a single column as intended, with the dashboard moving below the hero copy.
+- **Changed:** Added staggered scroll-triggered reveals for showcase cards, feature cards, workflow steps and pricing cards; added hero copy entrance timing, a gently floating dashboard preview, slow orbit drift, a subtle status-dot pulse and animated CTA arrows/hover lift. Wrapped pricing in the scroll-reveal observer.
+- **Tests added first:** Added assertions for the pricing reveal wrapper, hero keyframes, dashboard float and staggered scroll reveal selector.
+- **Accessibility:** All new motion is disabled under `prefers-reduced-motion: reduce`.
+- **Next:** Confirm the latest CI run and ask for a quick scroll check of the pricing toggle and image sections on the local browser.
