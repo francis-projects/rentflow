@@ -211,15 +211,19 @@ export type Database = {
           assigned_to: string | null
           category: string
           completed_at: string | null
+          deposit_deduction_minor: number
           description: string | null
           due_date: string | null
           id: string
+          maintenance_cost_minor: number
           organization_id: string
           priority: string
           property_id: string
           reported_at: string
           reported_by: string
+          responsible_lease_id: string | null
           status: string
+          tenant_damage: boolean
           title: string
           unit_id: string | null
           updated_at: string
@@ -228,15 +232,19 @@ export type Database = {
           assigned_to?: string | null
           category?: string
           completed_at?: string | null
+          deposit_deduction_minor?: number
           description?: string | null
           due_date?: string | null
           id?: string
+          maintenance_cost_minor?: number
           organization_id: string
           priority?: string
           property_id: string
           reported_at?: string
           reported_by: string
+          responsible_lease_id?: string | null
           status?: string
+          tenant_damage?: boolean
           title: string
           unit_id?: string | null
           updated_at?: string
@@ -245,15 +253,19 @@ export type Database = {
           assigned_to?: string | null
           category?: string
           completed_at?: string | null
+          deposit_deduction_minor?: number
           description?: string | null
           due_date?: string | null
           id?: string
+          maintenance_cost_minor?: number
           organization_id?: string
           priority?: string
           property_id?: string
           reported_at?: string
           reported_by?: string
+          responsible_lease_id?: string | null
           status?: string
+          tenant_damage?: boolean
           title?: string
           unit_id?: string | null
           updated_at?: string
@@ -272,6 +284,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_responsible_lease_org_fk"
+            columns: ["responsible_lease_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "leases"
+            referencedColumns: ["id", "organization_id"]
           },
           {
             foreignKeyName: "maintenance_unit_org_fk"
@@ -903,6 +922,74 @@ export type Database = {
           },
         ]
       }
+      security_deposit_transactions: {
+        Row: {
+          amount_minor: number
+          created_at: string
+          description: string
+          id: string
+          lease_id: string
+          maintenance_request_id: string | null
+          organization_id: string
+          recorded_by: string
+          tenant_id: string
+          transaction_type: string
+        }
+        Insert: {
+          amount_minor: number
+          created_at?: string
+          description: string
+          id?: string
+          lease_id: string
+          maintenance_request_id?: string | null
+          organization_id: string
+          recorded_by: string
+          tenant_id: string
+          transaction_type: string
+        }
+        Update: {
+          amount_minor?: number
+          created_at?: string
+          description?: string
+          id?: string
+          lease_id?: string
+          maintenance_request_id?: string | null
+          organization_id?: string
+          recorded_by?: string
+          tenant_id?: string
+          transaction_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "security_deposit_transactions_lease_id_organization_id_fkey"
+            columns: ["lease_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "leases"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "security_deposit_transactions_maintenance_request_id_organ_fkey"
+            columns: ["maintenance_request_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "maintenance_requests"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "security_deposit_transactions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "security_deposit_transactions_tenant_id_organization_id_fkey"
+            columns: ["tenant_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
       subscription_change_requests: {
         Row: {
           billing_interval: string
@@ -1287,6 +1374,18 @@ export type Database = {
         Args: { p_organization_id: string; p_period: string }
         Returns: number
       }
+      record_maintenance_cost_and_deposit_deduction: {
+        Args: {
+          p_cost_minor: number
+          p_deduction_minor: number
+          p_description: string
+          p_lease_id: string
+          p_organization_id: string
+          p_request_id: string
+          p_tenant_damage: boolean
+        }
+        Returns: undefined
+      }
       record_rent_payment: {
         Args: {
           p_allocations?: Json
@@ -1298,6 +1397,16 @@ export type Database = {
           p_payment_reference?: string
           p_received_at?: string
           p_tenant_id: string
+        }
+        Returns: string
+      }
+      record_security_deposit_transaction: {
+        Args: {
+          p_amount_minor: number
+          p_description: string
+          p_lease_id: string
+          p_organization_id: string
+          p_transaction_type: string
         }
         Returns: string
       }
