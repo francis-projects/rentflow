@@ -1,0 +1,21 @@
+import { createProperty, createUnit } from "@/app/actions/portfolio";
+import { getWorkspaceContext } from "@/lib/rentflow/context";
+import { WorkspaceLayout } from "@/components/workspace-layout";
+
+export default async function PropertiesPage({searchParams}:{searchParams:Promise<{error?:string;success?:string}>}) {
+ const {supabase,organization}=await getWorkspaceContext();
+ const [{data:properties},{data:units},params]=await Promise.all([
+  supabase.from("properties").select("id,name,property_type,address_line,district,city,created_at").eq("organization_id",organization.id).is("archived_at",null).order("created_at",{ascending:false}),
+  supabase.from("units").select("id,property_id,unit_code,monthly_rent_minor,status,bedrooms").eq("organization_id",organization.id).order("unit_code"),
+  searchParams
+ ]);
+ return <WorkspaceLayout workspaceName={organization.name}><div className="page-heading"><div><p className="eyebrow">PORTFOLIO</p><h1>Properties & units</h1><p className="muted">Register buildings and manage the rental units within them.</p></div></div>
+ {params.error&&<p className="error-message">{params.error}</p>}{params.success&&<p className="success-message">{params.success}</p>}
+ <div className="two-column"><section className="panel"><h2>Add a property</h2><form action={createProperty} className="data-form">
+ <label>Property name<input name="name" required placeholder="e.g. Bukoto Apartments"/></label><label>Property type<select name="property_type"><option value="residential">Residential</option><option value="commercial">Commercial</option><option value="mixed_use">Mixed use</option></select></label>
+ <label>Street / address<input name="address_line" placeholder="Street, road or area"/></label><div className="form-grid"><label>District<input name="district" placeholder="Kampala"/></label><label>City / town<input name="city" placeholder="Kampala"/></label></div><label>Notes<textarea name="notes" rows={2}/></label><button>Add property</button></form></section>
+ <section className="panel"><h2>Add a rental unit</h2><form action={createUnit} className="data-form"><label>Property<select name="property_id" required defaultValue=""><option value="" disabled>Select property</option>{properties?.map(p=><option value={p.id} key={p.id}>{p.name}</option>)}</select></label><label>Unit / room number<input name="unit_code" required placeholder="e.g. A-01"/></label><div className="form-grid"><label>Monthly rent (UGX)<input name="monthly_rent" type="number" min="0" step="1" required/></label><label>Bedrooms<input name="bedrooms" type="number" min="0"/></label></div><div className="form-grid"><label>Floor<input name="floor_label"/></label><label>Bathrooms<input name="bathrooms" type="number" min="0" step="0.5"/></label></div><button disabled={!properties?.length}>Add unit</button>{!properties?.length&&<small>Add a property before adding its units.</small>}</form></section></div>
+ <section className="panel table-panel"><div className="section-heading"><h2>Registered properties</h2><span>{properties?.length??0} properties</span></div>{!properties?.length?<p className="empty-state">No properties registered yet.</p>:<div className="table-wrap"><table><thead><tr><th>Property</th><th>Type</th><th>Location</th><th>Units</th></tr></thead><tbody>{properties.map(p=><tr key={p.id}><td><strong>{p.name}</strong></td><td>{p.property_type}</td><td>{[p.address_line,p.district,p.city].filter(Boolean).join(", ")||"—"}</td><td>{units?.filter(u=>u.property_id===p.id).length??0}</td></tr>)}</tbody></table></div>}</section>
+ <section className="panel table-panel"><div className="section-heading"><h2>Rental units</h2><span>{units?.length??0} units</span></div>{!units?.length?<p className="empty-state">No rental units registered yet.</p>:<div className="table-wrap"><table><thead><tr><th>Unit</th><th>Property</th><th>Bedrooms</th><th>Monthly rent</th><th>Status</th></tr></thead><tbody>{units.map(u=><tr key={u.id}><td><strong>{u.unit_code}</strong></td><td>{properties?.find(p=>p.id===u.property_id)?.name??"—"}</td><td>{u.bedrooms??"—"}</td><td>{Number(u.monthly_rent_minor).toLocaleString("en-UG")}</td><td><span className="status-pill">{u.status}</span></td></tr>)}</tbody></table></div>}</section>
+ </WorkspaceLayout>;
+}
