@@ -152,6 +152,26 @@ export async function createMaintenanceRequest(data: FormData) {
   revalidatePath("/maintenance"); revalidatePath("/dashboard"); redirect("/maintenance?success=Maintenance%20request%20created");
 }
 
+
+export async function recordSecurityDepositTransaction(data: FormData) {
+  const {supabase,organization}=await getWorkspaceContext();
+  const leaseId=value(data,"lease_id"),type=value(data,"transaction_type"),amount=number(data,"amount_minor"),description=value(data,"description");
+  if(!leaseId||!["received","refund"].includes(type)||!Number.isSafeInteger(amount)||amount<=0||description.length<3) redirect("/leases?error=Enter%20valid%20deposit%20transaction%20details");
+  const {error}=await supabase.rpc("record_security_deposit_transaction",{p_organization_id:organization.id,p_lease_id:leaseId,p_transaction_type:type,p_amount_minor:amount,p_description:description});
+  if(error) redirect("/leases?error="+encodeURIComponent(error.message));
+  revalidatePath("/leases");revalidatePath("/maintenance");redirect("/leases?success=Security%20deposit%20transaction%20recorded");
+}
+
+export async function recordMaintenanceCostAndDeduction(data: FormData) {
+  const {supabase,organization}=await getWorkspaceContext();
+  const requestId=value(data,"request_id"),cost=number(data,"maintenance_cost_minor"),deduction=number(data,"deposit_deduction_minor"),tenantDamage=value(data,"tenant_damage")==="on",leaseId=value(data,"responsible_lease_id");
+  const description=value(data,"deduction_description");
+  if(!requestId||!Number.isSafeInteger(cost)||cost<0||!Number.isSafeInteger(deduction)||deduction<0||deduction>cost||(deduction>0&&(!tenantDamage||!leaseId||description.length<3))) redirect("/maintenance?error=Check%20the%20maintenance%20cost%20and%20deposit%20deduction%20details");
+  const {error}=await supabase.rpc("record_maintenance_cost_and_deposit_deduction",{p_organization_id:organization.id,p_request_id:requestId,p_cost_minor:cost,p_tenant_damage:tenantDamage,p_lease_id:leaseId||null,p_deduction_minor:deduction,p_description:description||null});
+  if(error) redirect("/maintenance?error="+encodeURIComponent(error.message));
+  revalidatePath("/maintenance");revalidatePath("/leases");revalidatePath("/owners");redirect("/maintenance?success=Maintenance%20cost%20and%20deposit%20ledger%20updated");
+}
+
 export async function updateMaintenanceStatus(data: FormData) {
   const {supabase,organization}=await getWorkspaceContext();
   const id=value(data,"request_id"), status=value(data,"status");
