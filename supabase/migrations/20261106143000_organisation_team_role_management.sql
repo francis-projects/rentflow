@@ -1,4 +1,7 @@
 -- Organisation team administration with database-enforced role boundaries.
+drop policy if exists organization_members_select_self on public.organization_members;
+create policy organization_members_select_org on public.organization_members
+for select to authenticated using (private.is_org_member(organization_id));
 create or replace function private.is_org_owner(p_org_id uuid)
 returns boolean language sql stable security definer set search_path = ''
 as $$
