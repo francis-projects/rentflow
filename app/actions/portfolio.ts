@@ -229,6 +229,7 @@ export async function allocateExpenseToProperty(data: FormData) {
 
 export async function recordOwnerPayout(data: FormData) {
  const {supabase,organization,userId}=await getWorkspaceContext();
+ await requirePlanFeature(supabase, organization.id, "owner_payouts");
  const ownerId=value(data,"owner_id"),propertyId=value(data,"property_id"),amount=number(data,"amount_minor"),paidOn=value(data,"paid_on"),method=value(data,"payment_method");
  if(!ownerId||!propertyId||!paidOn||!Number.isSafeInteger(amount)||amount<=0||!["cash","bank_transfer","mobile_money","cheque","other"].includes(method)) redirect("/owners?error=Complete%20the%20owner%20payout%20details");
  const {data:ownership,error:ownershipError}=await supabase.from("property_owners").select("id").eq("organization_id",organization.id).eq("owner_id",ownerId).eq("property_id",propertyId).maybeSingle();
