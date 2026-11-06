@@ -182,7 +182,7 @@ export async function recordMaintenanceCostAndDeduction(data: FormData) {
   const requestId=value(data,"request_id"),cost=number(data,"maintenance_cost_minor"),deduction=number(data,"deposit_deduction_minor"),tenantDamage=value(data,"tenant_damage")==="on",leaseId=value(data,"responsible_lease_id");
   const description=value(data,"deduction_description");
   if(!requestId||!Number.isSafeInteger(cost)||cost<0||!Number.isSafeInteger(deduction)||deduction<0||deduction>cost||(deduction>0&&(!tenantDamage||!leaseId||description.length<3))) redirect("/maintenance?error=Check%20the%20maintenance%20cost%20and%20deposit%20deduction%20details");
-  const {error}=await supabase.rpc("record_maintenance_cost_and_deposit_deduction",{p_organization_id:organization.id,p_request_id:requestId,p_cost_minor:cost,p_tenant_damage:tenantDamage,p_lease_id:leaseId||null,p_deduction_minor:deduction,p_description:description||null});
+  const {error}=await supabase.rpc("record_maintenance_cost_and_deposit_deduction",{p_organization_id:organization.id,p_request_id:requestId,p_cost_minor:cost,p_tenant_damage:tenantDamage,p_lease_id:leaseId||"00000000-0000-0000-0000-000000000000",p_deduction_minor:deduction,p_description:description||null});
   if(error) redirect("/maintenance?error="+encodeURIComponent(error.message));
   revalidatePath("/maintenance");revalidatePath("/leases");revalidatePath("/owners");redirect("/maintenance?success=Maintenance%20cost%20and%20deposit%20ledger%20updated");
 }
