@@ -213,3 +213,62 @@
 .evidence-upload-form input{min-width:0;max-width:100%;font:11px 'DM Sans',sans-serif}
 .evidence-upload-form button{justify-self:start;border:0;border-radius:7px;padding:9px 12px;background:#176b4b;color:#fff;font-size:10px;font-weight:700;cursor:pointer}
 @media(max-width:650px){.evidence-upload-form{grid-template-columns:1fr}}
+
+
+/* Motion system: a confident entrance, gentle ambient movement and scroll-triggered cascades */
+@keyframes hero-enter{
+  from{opacity:0;transform:translate3d(0,26px,0)}
+  to{opacity:1;transform:translate3d(0,0,0)}
+}
+@keyframes dashboard-float{
+  0%,100%{transform:translate3d(0,0,0)}
+  50%{transform:translate3d(0,-10px,0)}
+}
+@keyframes orbit-drift{
+  0%,100%{transform:translate3d(0,0,0) rotate(0deg)}
+  50%{transform:translate3d(-12px,10px,0) rotate(3deg)}
+}
+@keyframes soft-glow{
+  0%,100%{opacity:.45}
+  50%{opacity:.9}
+}
+@keyframes reveal-up{
+  from{opacity:0;transform:translate3d(0,24px,0) scale(.985)}
+  to{opacity:1;transform:translate3d(0,0,0) scale(1)}
+}
+.landing-hero-copy{animation:hero-enter .85s cubic-bezier(.2,.75,.25,1) both}
+.landing-hero-copy .landing-kicker{animation:hero-enter .65s .08s both}
+.landing-hero-copy h1{animation:hero-enter .85s .16s both}
+.landing-hero-text{animation:hero-enter .8s .27s both}
+.landing-hero-actions{animation:hero-enter .8s .38s both}
+.landing-trust-line{animation:hero-enter .8s .48s both}
+.landing-visual{animation:hero-enter .9s .22s both,dashboard-float 7s 1.2s ease-in-out infinite}
+.landing-hero-orbit{animation:orbit-drift 16s ease-in-out infinite}
+.landing-visual-top .visual-dot{animation:soft-glow 2.8s ease-in-out infinite}
+.landing-primary-cta,.landing-nav-cta{transition:transform .22s ease,box-shadow .22s ease,background .22s ease}
+.landing-primary-cta:hover,.landing-nav-cta:hover{transform:translateY(-3px);box-shadow:0 12px 25px #176b4b2b}
+.landing-primary-cta span,.landing-nav-cta span{display:inline-block;transition:transform .22s ease}
+.landing-primary-cta:hover span,.landing-nav-cta:hover span{transform:translate(3px,-3px)}
+.landing-strip b{transition:color .25s ease,transform .25s ease}
+.landing-strip b:hover{color:#176b4b;transform:translateY(-2px)}
+.scroll-reveal.is-visible .showcase-card,
+.scroll-reveal.is-visible .landing-feature-card,
+.scroll-reveal.is-visible .landing-steps>div,
+.scroll-reveal.is-visible .pricing-card{animation:reveal-up .7s cubic-bezier(.2,.75,.25,1) both}
+.scroll-reveal.is-visible .showcase-card:nth-child(2),
+.scroll-reveal.is-visible .landing-feature-card:nth-child(2),
+.scroll-reveal.is-visible .landing-steps>div:nth-child(2),
+.scroll-reveal.is-visible .pricing-card:nth-child(2){animation-delay:.10s}
+.scroll-reveal.is-visible .showcase-card:nth-child(3),
+.scroll-reveal.is-visible .landing-feature-card:nth-child(3),
+.scroll-reveal.is-visible .landing-steps>div:nth-child(3),
+.scroll-reveal.is-visible .pricing-card:nth-child(3){animation-delay:.20s}
+.scroll-reveal.is-visible .landing-feature-card:nth-child(4),
+.scroll-reveal.is-visible .pricing-card:nth-child(4){animation-delay:.30s}
+.showcase-card .showcase-image{will-change:transform}
+.pricing-card{will-change:transform}
+@media(prefers-reduced-motion:reduce){
+  .landing-hero-copy,.landing-hero-copy .landing-kicker,.landing-hero-copy h1,.landing-hero-text,.landing-hero-actions,.landing-trust-line,.landing-visual,.landing-hero-orbit,.landing-visual-top .visual-dot{animation:none!important}
+  .scroll-reveal.is-visible .showcase-card,.scroll-reveal.is-visible .landing-feature-card,.scroll-reveal.is-visible .landing-steps>div,.scroll-reveal.is-visible .pricing-card{animation:none!important}
+  .landing-primary-cta,.landing-nav-cta,.landing-primary-cta span,.landing-nav-cta span{transition:none!important}
+}
