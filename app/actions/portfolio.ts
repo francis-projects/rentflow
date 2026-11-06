@@ -120,3 +120,31 @@ export async function reversePayment(data: FormData) {
   revalidatePath("/rent"); revalidatePath("/dashboard"); revalidatePath("/reports");
   redirect("/rent?success=Payment%20reversed%20with%20audit%20record");
 }
+
+
+export async function createMaintenanceRequest(data: FormData) {
+  const {supabase,organization,userId}=await getWorkspaceContext();
+  const title=value(data,"title");
+  const propertyId=value(data,"property_id");
+  if(title.length<3||!propertyId) redirect("/maintenance?error=Enter%20a%20title%20and%20select%20a%20property");
+  const {error}=await supabase.from("maintenance_requests").insert({
+    organization_id:organization.id,property_id:propertyId,unit_id:value(data,"unit_id")||null,
+    title,description:value(data,"description")||null,category:value(data,"category")||"general",
+    priority:value(data,"priority")||"normal",due_date:value(data,"due_date")||null,reported_by:userId
+  });
+  if(error) redirect("/maintenance?error="+encodeURIComponent(error.message));
+  revalidatePath("/maintenance"); revalidatePath("/dashboard");
+  redirect("/maintenance?success=Maintenance%20request%20created");
+}
+
+export async function updateMaintenanceStatus(data: FormData) {
+  const {supabase,organization}=await getWorkspaceContext();
+  const id=value(data,"request_id"), status=value(data,"status");
+  if(!id||!["open","in_progress","waiting","completed","cancelled"].includes(status)) redirect("/maintenance?error=Invalid%20maintenance%20status");
+  const {error}=await supabase.from("maintenance_requests").update({
+    status,completed_at:status==="completed"?new Date().toISOString():null,updated_at:new Date().toISOString()
+  }).eq("id",id).eq("organization_id",organization.id);
+  if(error) redirect("/maintenance?error="+encodeURIComponent(error.message));
+  revalidatePath("/maintenance"); revalidatePath("/dashboard");
+  redirect("/maintenance?success=Maintenance%20request%20updated");
+}
