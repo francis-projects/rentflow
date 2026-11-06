@@ -73,8 +73,16 @@ export async function generateRentCharges() {
 export async function recordPayment(data: FormData) {
   const {supabase,organization}=await getWorkspaceContext();
   const amount=number(data,"amount_minor");
-  const chargeId=value(data,"rent_charge_id");
-  const allocations=chargeId?[{rent_charge_id:chargeId,amount_minor:amount}]:[];
+  const allocations=[];
+  for(let i=1;i<=5;i++){
+    const chargeId=value(data,"allocation_charge_"+i);
+    const allocationAmount=number(data,"allocation_amount_"+i);
+    if(chargeId||allocationAmount){
+      if(!chargeId||!Number.isSafeInteger(allocationAmount)||allocationAmount<=0) redirect("/rent?error=Complete%20each%20allocation%20row%20with%20a%20valid%20amount");
+      allocations.push({rent_charge_id:chargeId,amount_minor:allocationAmount});
+    }
+  }
+  if(allocations.reduce((sum,a)=>sum+a.amount_minor,0)>amount) redirect("/rent?error=Allocated%20amounts%20cannot%20exceed%20the%20payment");
   const {data:paymentId,error}=await supabase.rpc("record_rent_payment",{
     p_organization_id:organization.id,p_tenant_id:value(data,"tenant_id"),
     p_lease_id:value(data,"lease_id")||null,p_amount_minor:amount,
@@ -147,4 +155,39 @@ export async function updateMaintenanceStatus(data: FormData) {
   if(error) redirect("/maintenance?error="+encodeURIComponent(error.message));
   revalidatePath("/maintenance"); revalidatePath("/dashboard");
   redirect("/maintenance?success=Maintenance%20request%20updated");
+}
+
+
+export async function uploadTenantDocument(data: FormData) {
+  const {supabase,organization,userId}=await getWorkspaceContext();
+  const tenantId=value(data,"tenant_id");
+  const file=data.get("document");
+  if(!(file instanceof File)||file.size===0||file.size>10*1024*1024) redirect("/tenants?error=Choose%20a%20file%20up%20to%2010MB");
+  const allowed=["application/pdf","image/jpeg","image/png"];
+  if(!allowed.includes(file.type)) redirect("/tenants?error=Only%20PDF,%20JPG%20and%20PNG%20files%20are%20allowed");
+  const {data:tenant,error:tenantError}=await supabase.from("tenants").select("id").eq("id",tenantId).eq("organization_id",organization.id).maybeSingle();
+  if(tenantError||!tenant) redirect("/tenants?error=Select%20a%20valid%20tenant");
+  const safeName=file.name.replace(/[^a-zA-Z0-9._-]/g,"_").slice(-100)||"document";
+  const path=organization.id+"/"+tenantId+"/"+crypto.randomUUID()+"-"+safeName;
+  const {error:uploadError}=await supabase.storage.from("tenant-documents").upload(path,file,{contentType:file.type,upsert:false});
+  if(uploadError) redirect("/tenants?error="+encodeURIComponent(uploadError.message));
+  const {error}=await supabase.from("tenant_documents").insert({
+    organization_id:organization.id,tenant_id:tenantId,file_name:file.name,storage_path:path,
+    content_type:file.type,size_bytes:file.size,document_type:value(data,"document_type")||"other",
+    notes:value(data,"notes")||null,uploaded_by:userId
+  });
+  if(error){await supabase.storage.from("tenant-documents").remove([path]);redirect("/tenants?error="+encodeURIComponent(error.message));}
+  revalidatePath("/tenants"); redirect("/tenants?success=Document%20uploaded%20securely");
+}
+
+export async function deleteTenantDocument(data: FormData) {
+ const {supabase,organization}=await getWorkspaceContext();
+ const id=value(data,"document_id");
+ const {data:doc,error:readError}=await supabase.from("tenant_documents").select("id,storage_path").eq("id",id).eq("organization_id",organization.id).maybeSingle();
+ if(readError||!doc) redirect("/tenants?error=Document%20not%20found");
+ const {error}=await supabase.storage.from("tenant-documents").remove([doc.storage_path]);
+ if(error) redirect("/tenants?error="+encodeURIComponent(error.message));
+ const {error:dbError}=await supabase.from("tenant_documents").delete().eq("id",id).eq("organization_id",organization.id);
+ if(dbError) redirect("/tenants?error="+encodeURIComponent(dbError.message));
+ revalidatePath("/tenants"); redirect("/tenants?success=Document%20deleted");
 }
