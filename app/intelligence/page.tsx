@@ -38,7 +38,10 @@ export default async function IntelligencePage(){
  const collectionRate=charged>0?Math.min(100,Math.round(paidThisMonth/charged*100)):0;
  const overdue=(charges??[]).filter(c=>c.due_date<today&&Number(c.balance_minor)>0);
  const overdueAmount=overdue.reduce((s,c)=>s+Number(c.balance_minor),0);
- const dueSoon=(charges??[]).filter(c=>c.due_date>=today&&c.due_date<=new Date(Date.now()+7*86400000).toLocaleDateString("en-CA",{timeZone:"Africa/Kampala"})&&Number(c.balance_minor)>0);
+ const dueSoonEnd=new Date(`${today}T00:00:00Z`);
+ dueSoonEnd.setUTCDate(dueSoonEnd.getUTCDate()+7);
+ const dueSoonDate=dueSoonEnd.toISOString().slice(0,10);
+ const dueSoon=(charges??[]).filter(c=>c.due_date>=today&&c.due_date<=dueSoonDate&&Number(c.balance_minor)>0);
  const openMaintenance=maintenance??[];
  const urgentMaintenance=openMaintenance.filter(m=>m.priority==="urgent"||m.priority==="high");
  const netCash=paidThisMonth-expensesThisMonth;
