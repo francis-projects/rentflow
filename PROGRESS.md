@@ -12,6 +12,8 @@ The exact Emilkowalski, Impeccable and Taste skills are not installed in this wo
 - **Changed:** Added a database-driven monthly/annual pricing toggle, clear annual savings, a refreshed pricing card grid, property imagery, hover states, scroll-reveal sections and responsive styles for 375px, 768px, 1024px and 1440px layouts. Changed the marketing dashboard preview currency label to USD.
 - **Tests added first:** Node's built-in test runner checks database-driven pricing, accessible billing toggle controls, responsive breakpoints and reduced-motion support.
 - **CI:** Added `npm test` before lint, typecheck and build.
-- **Results:** Pending GitHub Actions run.
-- **Completion estimate:** 55% (implementation committed; real browser/responsive and accessibility checks still required).
-- **Next:** Fix any test/lint/type/build failures; then inspect the actual local landing page at mobile, tablet and desktop widths and verify image loading, pricing toggle behavior and navigation.
+- **First CI result:** The initial page commit exposed a TypeScript prop mismatch (the component required fields the page did not select) and lint reported an obsolete pricing formatter plus a pre-existing unused inspection-evidence action import.
+- **Fixes made:** Narrowed the pricing component type to the selected fields; removed the obsolete formatter; restored the inspection evidence upload form so its server action is actually used.
+- **Latest checks:** Re-run pending on the latest commit; test/lint/typecheck/build not yet confirmed green for the final iteration commit.
+- **Completion estimate:** 65% (implementation and responsive CSS committed; browser verification at all target widths, Lighthouse and visual QA still required).
+- **Next:** Confirm the latest CI run is green, then ask the user to refresh the local page and share desktop/mobile screenshots for actual browser verification.
