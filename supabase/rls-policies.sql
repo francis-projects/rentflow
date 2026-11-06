@@ -1,6 +1,5 @@
--- RentFlow initial row-level security policies.
--- Apply after supabase/schema.sql in a development database and test with
--- multiple users belonging to different organisations before production.
+-- Historical baseline RLS policy snapshot. Current role-aware policies are
+-- maintained in the versioned migration files under supabase/migrations/.
 
 -- A user can read an organisation if they created it or are a member.
 create policy "organizations_select_member_or_creator"
