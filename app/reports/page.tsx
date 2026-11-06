@@ -3,7 +3,8 @@ import { WorkspaceLayout } from "@/components/workspace-layout";
 export default async function ReportsPage(){
  const {supabase,organization}=await getWorkspaceContext();
  const [{data:charges},{data:balances},{data:payments},{data:expensesList},{data:properties},{data:units},{data:leases},{data:tenants}]=await Promise.all([
-  supabase.from("rent_charges").select("*").eq("organization_id",organization.id).order("due_date",{ascending:false}),\n  supabase.from("rent_charge_balances").select("balance_minor,status").eq("organization_id",organization.id),
+  supabase.from("rent_charges").select("*").eq("organization_id",organization.id).order("due_date",{ascending:false}),
+  supabase.from("rent_charge_balances").select("balance_minor,status").eq("organization_id",organization.id),
   supabase.from("payments").select("*").eq("organization_id",organization.id).eq("status","posted").order("received_at",{ascending:false}),
   supabase.from("expenses").select("*").eq("organization_id",organization.id).eq("status","recorded").order("incurred_on",{ascending:false}),
   supabase.from("properties").select("id,name").eq("organization_id",organization.id).is("archived_at",null),
