@@ -98,3 +98,13 @@ export async function createExpense(data: FormData) {
   if(error) redirect("/expenses?error="+encodeURIComponent(error.message));
   revalidatePath("/expenses"); revalidatePath("/dashboard"); redirect("/expenses?success=Expense%20recorded");
 }
+
+export async function assignPropertyOwner(data: FormData) {
+  const {supabase,organization}=await getWorkspaceContext();
+  const property_id=value(data,"property_id"), owner_id=value(data,"owner_id");
+  const ownership_percent=Number(value(data,"ownership_percent"));
+  if(!property_id||!owner_id||!Number.isFinite(ownership_percent)||ownership_percent<=0||ownership_percent>100) redirect("/owners?error=Enter%20a%20valid%20property%20owner%20allocation");
+  const {error}=await supabase.from("property_owners").upsert({organization_id:organization.id,property_id,owner_id,ownership_percent},{onConflict:"property_id,owner_id"});
+  if(error) redirect("/owners?error="+encodeURIComponent(error.message));
+  revalidatePath("/owners"); redirect("/owners?success=Property%20ownership%20updated");
+}
