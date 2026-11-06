@@ -1,15 +1,16 @@
-import { createLease, recordSecurityDepositTransaction, endLease, recordLeaseInspection } from "@/app/actions/portfolio";
+import { createLease, recordSecurityDepositTransaction, endLease, recordLeaseInspection, uploadLeaseInspectionEvidence } from "@/app/actions/portfolio";
 import { getWorkspaceContext } from "@/lib/rentflow/context";
 import { WorkspaceLayout } from "@/components/workspace-layout";
 import { SearchableSelect } from "@/components/searchable-select";
 export default async function LeasesPage({searchParams}:{searchParams:Promise<{error?:string;success?:string}>}) {
  const {supabase,organization}=await getWorkspaceContext();
- const [{data:leases},{data:units},{data:tenants},{data:depositTransactions},{data:inspections},params]=await Promise.all([
+ const [{data:leases},{data:units},{data:tenants},{data:depositTransactions},{data:inspections},{data:evidence},params]=await Promise.all([
   supabase.from("leases").select("*").eq("organization_id",organization.id).order("created_at",{ascending:false}),
   supabase.from("units").select("id,unit_code,property_id,status").eq("organization_id",organization.id).eq("status","vacant").order("unit_code"),
   supabase.from("tenants").select("id,full_name").eq("organization_id",organization.id).order("full_name"),
   supabase.from("security_deposit_transactions").select("*").eq("organization_id",organization.id).order("created_at",{ascending:false}),
   supabase.from("lease_inspections").select("*").eq("organization_id",organization.id).order("inspected_at",{ascending:false}),
+  supabase.from("lease_inspection_evidence").select("*").eq("organization_id",organization.id).order("uploaded_at",{ascending:false}),
   searchParams
  ]);
  const {data:properties}=await supabase.from("properties").select("id,name").eq("organization_id",organization.id);
