@@ -1,4 +1,4 @@
-import { createMaintenanceRequest, updateMaintenanceStatus } from "@/app/actions/portfolio";
+import { createMaintenanceRequest, updateMaintenanceStatus, recordMaintenanceCostAndDeduction } from "@/app/actions/portfolio";
 import { getWorkspaceContext } from "@/lib/rentflow/context";
 import { WorkspaceLayout } from "@/components/workspace-layout";
 import { SearchableSelect } from "@/components/searchable-select";
@@ -8,7 +8,7 @@ const statuses=["open","in_progress","waiting","completed","cancelled"];
 
 export default async function MaintenancePage({searchParams}:{searchParams:Promise<{error?:string;success?:string}>}) {
  const {supabase,organization}=await getWorkspaceContext();
- const [{data:properties},{data:units},{data:requests},params]=await Promise.all([
+ const [{data:properties},{data:units},{data:requests},{data:leases},{data:tenants},params]=await Promise.all([
   supabase.from("properties").select("id,name").eq("organization_id",organization.id).is("archived_at",null).order("name"),
   supabase.from("units").select("id,property_id,unit_code").eq("organization_id",organization.id).order("unit_code"),
   supabase.from("maintenance_requests").select("*").eq("organization_id",organization.id).order("reported_at",{ascending:false}).limit(100),
@@ -27,7 +27,7 @@ export default async function MaintenancePage({searchParams}:{searchParams:Promi
    <label className="form-span">Description<textarea name="description" rows={3} placeholder="Describe the problem, access requirements and any useful details."/></label>
   </div><button disabled={!properties?.length}>Create request</button></form></section>
   <section className="panel table-panel"><div className="section-heading"><h2>Maintenance register</h2><span>{requests?.length??0} recent requests</span></div>
-   {!requests?.length?<p className="empty-state">No maintenance requests yet.</p>:<div className="table-wrap"><table><thead><tr><th>Reported</th><th>Issue</th><th>Property / unit</th><th>Priority</th><th>Status</th><th>Target date</th><th>Update</th></tr></thead><tbody>{requests.map(r=><tr key={r.id}>
+   {!requests?.length?<p className="empty-state">No maintenance requests yet.</p>:<div className="table-wrap"><table><thead><tr><th>Reported</th><th>Issue</th><th>Property / unit</th><th>Priority</th><th>Status</th><th>Target date</th><th>Cost / deposit deduction</th><th>Update</th></tr></thead><tbody>{requests.map(r=><tr key={r.id}>
     <td>{new Date(r.reported_at).toLocaleDateString("en-UG")}</td><td><strong>{r.title}</strong><br/><small>{r.description??r.category}</small></td>
     <td>{properties?.find(p=>p.id===r.property_id)?.name??"Property"}<br/><small>{units?.find(u=>u.id===r.unit_id)?.unit_code??"Whole property"}</small></td>
     <td><span className="status-pill">{r.priority}</span></td><td><span className="status-pill">{r.status.replace("_"," ")}</span></td><td>{r.due_date??"—"}</td>
