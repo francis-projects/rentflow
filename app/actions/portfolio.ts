@@ -3,12 +3,18 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getWorkspaceContext } from "@/lib/rentflow/context";
+import { getWorkspacePlan, requirePlanFeature } from "@/lib/rentflow/entitlements";
 
 function value(data: FormData, key: string) { return String(data.get(key) ?? "").trim(); }
 function number(data: FormData, key: string) { return Number(value(data, key)); }
 
 export async function createProperty(data: FormData) {
   const { supabase, organization } = await getWorkspaceContext();
+  const plan = await getWorkspacePlan(supabase, organization.id);
+  if (plan?.max_properties !== null && plan?.max_properties !== undefined) {
+    const { count } = await supabase.from("properties").select("id", { count: "exact", head: true }).eq("organization_id", organization.id);
+    if ((count ?? 0) >= plan.max_properties) redirect("/subscription?error=Your%20current%20plan%20property%20limit%20has%20been%20reached");
+  }
   const name=value(data,"name");
   if (!name) redirect("/properties?error=Enter%20a%20property%20name");
   const { error } = await supabase.from("properties").insert({
@@ -22,6 +28,11 @@ export async function createProperty(data: FormData) {
 
 export async function createUnit(data: FormData) {
   const {supabase,organization}=await getWorkspaceContext();
+  const plan = await getWorkspacePlan(supabase, organization.id);
+  if (plan?.max_units !== null && plan?.max_units !== undefined) {
+    const { count } = await supabase.from("units").select("id", { count: "exact", head: true }).eq("organization_id", organization.id);
+    if ((count ?? 0) >= plan.max_units) redirect("/subscription?error=Your%20current%20plan%20unit%20limit%20has%20been%20reached");
+  }
   const rent=number(data,"monthly_rent");
   if(!value(data,"property_id")||!value(data,"unit_code")||!Number.isSafeInteger(rent)||rent<0) redirect("/properties?error=Check%20the%20unit%20details");
   const {error}=await supabase.from("units").insert({
@@ -153,6 +164,7 @@ export async function updateMaintenanceStatus(data: FormData) {
 
 export async function uploadTenantDocument(data: FormData) {
   const {supabase,organization,userId}=await getWorkspaceContext();
+  await requirePlanFeature(supabase, organization.id, "tenant_documents");
   const tenantId=value(data,"tenant_id"), file=data.get("document");
   if(!(file instanceof File)||file.size===0||file.size>10*1024*1024) redirect("/tenants?error=Choose%20a%20file%20up%20to%2010MB");
   if(!["application/pdf","image/jpeg","image/png"].includes(file.type)) redirect("/tenants?error=Only%20PDF,%20JPG%20and%20PNG%20files%20are%20allowed");
@@ -185,6 +197,7 @@ export async function deleteTenantDocument(data: FormData) {
 
 export async function updateOrganisationMemberRole(data: FormData) {
   const {supabase,organization}=await getWorkspaceContext();
+  await requirePlanFeature(supabase, organization.id, "team_management");
   const memberId=value(data,"member_id"), role=value(data,"role");
   if(!memberId||!["admin","manager","accountant","staff"].includes(role)) redirect("/team?error=Select%20a%20valid%20team%20role");
   const {data:updated,error}=await supabase.from("organization_members").update({role:role as "admin"|"manager"|"accountant"|"staff"}).eq("id",memberId).eq("organization_id",organization.id).select("id").maybeSingle();
@@ -194,6 +207,7 @@ export async function updateOrganisationMemberRole(data: FormData) {
 
 export async function removeOrganisationMember(data: FormData) {
   const {supabase,organization,userId}=await getWorkspaceContext();
+  await requirePlanFeature(supabase, organization.id, "team_management");
   const memberId=value(data,"member_id");
   if(!memberId) redirect("/team?error=Select%20a%20team%20member");
   const {data:target,error:readError}=await supabase.from("organization_members").select("id,user_id,role").eq("id",memberId).eq("organization_id",organization.id).maybeSingle();
