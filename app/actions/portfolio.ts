@@ -191,3 +191,25 @@ export async function deleteTenantDocument(data: FormData) {
  if(dbError) redirect("/tenants?error="+encodeURIComponent(dbError.message));
  revalidatePath("/tenants"); redirect("/tenants?success=Document%20deleted");
 }
+
+
+export async function updateOrganisationMemberRole(data: FormData) {
+  const {supabase,organization}=await getWorkspaceContext();
+  const memberId=value(data,"member_id"), role=value(data,"role");
+  if(!memberId||!["admin","manager","accountant","staff"].includes(role)) redirect("/team?error=Select%20a%20valid%20team%20role");
+  const {data:updated,error}=await supabase.from("organization_members").update({role:role as "admin"|"manager"|"accountant"|"staff"}).eq("id",memberId).eq("organization_id",organization.id).select("id").maybeSingle();
+  if(error||!updated) redirect("/team?error="+encodeURIComponent(error?.message??"You do not have permission to change this member"));
+  revalidatePath("/team"); redirect("/team?success=Member%20role%20updated");
+}
+
+export async function removeOrganisationMember(data: FormData) {
+  const {supabase,organization,userId}=await getWorkspaceContext();
+  const memberId=value(data,"member_id");
+  if(!memberId) redirect("/team?error=Select%20a%20team%20member");
+  const {data:target,error:readError}=await supabase.from("organization_members").select("id,user_id,role").eq("id",memberId).eq("organization_id",organization.id).maybeSingle();
+  if(readError||!target) redirect("/team?error=Team%20member%20not%20found");
+  if(target.user_id===userId) redirect("/team?error=You%20cannot%20remove%20yourself%20from%20the%20workspace");
+  const {error}=await supabase.from("organization_members").delete().eq("id",memberId).eq("organization_id",organization.id);
+  if(error) redirect("/team?error="+encodeURIComponent(error.message));
+  revalidatePath("/team"); redirect("/team?success=Member%20removed%20from%20workspace");
+}
