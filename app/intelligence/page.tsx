@@ -68,7 +68,7 @@ export default async function IntelligencePage(){
    <article className="intelligence-metric"><small>Properties</small><strong>{propertyCount}</strong><span>Active properties</span></article>
    <article className="intelligence-metric"><small>Occupancy</small><strong>{occupancy}%</strong><span>{occupied} occupied · {vacant} vacant</span></article>
    <article className="intelligence-metric"><small>Overdue rent</small><strong>{money(overdueAmount)}</strong><span>{overdue.length} overdue charge(s)</span></article>
-   <article className="intelligence-metric"><small>Charge collection rate</small><strong>{collectionRate}%</strong><span>Payments allocated to this month's charges</span></article>
+   <article className="intelligence-metric"><small>Charge collection rate</small><strong>{collectionRate}%</strong><span>Payments allocated to this month&apos;s charges</span></article>
    <article className="intelligence-metric"><small>Payments received</small><strong>{money(paidThisMonth)}</strong><span>Posted payments this month</span></article>
    <article className="intelligence-metric"><small>Recorded expenses</small><strong>{money(expensesThisMonth)}</strong><span>Expenses this month</span></article>
   </section>
