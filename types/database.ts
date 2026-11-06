@@ -322,6 +322,48 @@ export type Database = {
           },
         ]
       }
+      payment_reversals: {
+        Row: {
+          id: string
+          organization_id: string
+          payment_id: string
+          reason: string
+          reversed_at: string
+          reversed_by: string
+        }
+        Insert: {
+          id?: string
+          organization_id: string
+          payment_id: string
+          reason: string
+          reversed_at?: string
+          reversed_by: string
+        }
+        Update: {
+          id?: string
+          organization_id?: string
+          payment_id?: string
+          reason?: string
+          reversed_at?: string
+          reversed_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_reversals_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_reversals_payment_org_fk"
+            columns: ["payment_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "payments"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
       payments: {
         Row: {
           amount_minor: number
@@ -654,6 +696,45 @@ export type Database = {
       }
     }
     Views: {
+      owner_monthly_statements: {
+        Row: {
+          organization_id: string | null
+          owner_expense_share_minor: number | null
+          owner_id: string | null
+          owner_name: string | null
+          owner_net_minor: number | null
+          owner_rent_share_minor: number | null
+          ownership_percent: number | null
+          property_expenses_minor: number | null
+          property_id: string | null
+          property_name: string | null
+          property_rent_received_minor: number | null
+          statement_month: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_owners_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_owners_owner_id_organization_id_fkey"
+            columns: ["owner_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "owners"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "property_owners_property_id_organization_id_fkey"
+            columns: ["property_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
       rent_charge_balances: {
         Row: {
           amount_minor: number | null
@@ -703,6 +784,14 @@ export type Database = {
           p_tenant_id: string
         }
         Returns: string
+      }
+      reverse_rent_payment: {
+        Args: {
+          p_organization_id: string
+          p_payment_id: string
+          p_reason: string
+        }
+        Returns: undefined
       }
     }
     Enums: {
