@@ -1,6 +1,6 @@
 -- RentFlow initial PostgreSQL schema (Supabase-compatible).
--- This is a reviewed schema draft, not yet an applied migration.
--- Apply only to a disposable development database after review.
+-- Baseline schema snapshot. Applied to the connected RentFlow Supabase project
+-- through the versioned files in supabase/migrations/. Use migrations for changes.
 
 create extension if not exists pgcrypto;
 
