@@ -8,7 +8,7 @@ const featureLabels: Record<string,string> = {
  automated_reminders:"Automated rent reminders",ai_insights:"AI portfolio insights",priority_support:"Priority support"
 };
 const limitLabel=(value:number|null)=>value===null?"Unlimited":String(value);
-const currency=(amount:number|null)=>amount===null?"Contact us":amount===0?"Free": "UGX "+new Intl.NumberFormat("en-UG").format(amount/100);
+const currency=(amount:number|null)=>amount===null?"Contact us":amount===0?"Free": "USD "+new Intl.NumberFormat("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}).format(amount/100);
 
 export default async function SubscriptionPage({searchParams}:{searchParams:Promise<{error?:string;success?:string}>}) {
  const {supabase,organization,membership}=await getWorkspaceContext();
@@ -29,7 +29,7 @@ export default async function SubscriptionPage({searchParams}:{searchParams:Prom
    <div className="current-plan-meta"><strong>{subscription?.status??"Unassigned"}</strong><small>Billing: {subscription?.billing_interval??"—"}</small>{subscription?.current_period_end&&<small>Period ends {new Date(subscription.current_period_end).toLocaleDateString("en-UG")}</small>}</div>
   </section>
   {pending&&<section className="panel pending-plan-panel"><strong>Plan change request pending</strong><p>Your request for the {pendingPlan?.name??"selected"} plan ({pending.billing_interval}) was submitted on {new Date(pending.created_at).toLocaleDateString("en-UG")}. Your current plan remains active until the request is reviewed and any required payment arrangement is completed.</p></section>}
-  <div className="section-heading subscription-section-heading"><div><h2>Available plans</h2><p className="muted">UGX billing framework. Prices will be published after payment and pricing setup.</p></div></div>
+  <div className="section-heading subscription-section-heading"><div><h2>Available plans</h2><p className="muted">USD subscription pricing. Property rents, deposits and operational records remain in UGX.</p></div></div>
   <div className="plan-grid">{(plans??[]).map(plan=>{
    const features=Object.entries((plan.features??{}) as Record<string,unknown>).filter(([,enabled])=>enabled===true);
    const isCurrent=plan.id===subscription?.plan_id;
@@ -47,6 +47,6 @@ export default async function SubscriptionPage({searchParams}:{searchParams:Prom
     {isCurrent&&<div className="plan-current-note">Your workspace is currently on this plan.</div>}
    </article>;
   })}</div>
-  <section className="panel billing-note"><h2>Payments and billing</h2><p>Plan selection and change requests are available. Online payments, invoices, renewals and automatic upgrades are not connected yet. No payment is taken when you submit a request. Once the pricing and payment provider are confirmed, this section will support the complete billing workflow.</p></section>
+  <section className="panel billing-note"><h2>Payments and billing</h2><p>Plan selection and change requests are available. Subscription billing is being prepared in USD. Flutterwave is the first planned gateway, behind a provider-independent payment adapter so another gateway can be added later. Checkout, webhook verification, invoices and renewals are not enabled yet; no payment is collected when you request a plan change.</p></section>
  </WorkspaceLayout>;
 }
