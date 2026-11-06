@@ -15,5 +15,6 @@ export async function getWorkspaceContext() {
   if (!membership) redirect("/signup");
   const { data: organization } = await supabase
     .from("organizations").select("id,name,currency_code").eq("id", membership.organization_id).single();
+  if (!organization) redirect("/signup");
   return { supabase, userId, membership, organization };
 }
