@@ -26,3 +26,14 @@ The exact Emilkowalski, Impeccable and Taste skills are not installed in this wo
 - **Tests added first:** Added assertions for the pricing reveal wrapper, hero keyframes, dashboard float and staggered scroll reveal selector.
 - **Accessibility:** All new motion is disabled under `prefers-reduced-motion: reduce`.
 - **Next:** Confirm the latest CI run and ask for a quick scroll check of the pricing toggle and image sections on the local browser.
+
+### Iteration 3 — 2026-11-06
+- **Read first:** Resumed from the existing Iteration 1 and 2 log; no landing page rebuild.
+- **Tests added first:** Added checks for mobile section navigation and data-derived annual discount messaging.
+- **Changed:** Replaced the fixed 'Save 2 months' claim with a neutral annual-discount label. Each plan now calculates its actual annual savings percentage from the Supabase monthly and annual prices, and announces price changes with an accessible polite live region.
+- **Changed:** Restored the Features, How it works and Plans links on mobile in a compact second navigation row. Added visible keyboard focus outlines to marketing navigation, CTAs and billing controls.
+- **Test correction:** The first mobile-nav assertion was too restrictive about CSS formatting and failed. Replaced it with a selector-based assertion; the final test suite passes.
+- **CI:** Latest head commit b3d0ec46f398a76e26e33df2d6a0d5c4aca0755d passed npm test, ESLint, TypeScript typecheck and the Next.js production build.
+- **Still unverified:** Live browser click-through for signup/sign-in and the monthly/annual toggle; image loading in the user's environment; Lighthouse; and fresh screenshots after the mobile-nav adjustment. The previous screenshots showed the existing 375px, 768px and 1440px layout before this latest small navigation refinement.
+- **Completion estimate:** 80% (latest automated quality checks green; visual and end-to-end browser checks remain).
+- **Next:** Verify the current localhost page at 375px, 768px and 1440px, click both billing intervals and each CTA, and run Lighthouse/accessibility checks if browser tooling is available.
