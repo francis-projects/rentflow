@@ -75,7 +75,7 @@ export async function recordPayment(data: FormData) {
   const amount=number(data,"amount_minor");
   const chargeId=value(data,"rent_charge_id");
   const allocations=chargeId?[{rent_charge_id:chargeId,amount_minor:amount}]:[];
-  const {error}=await supabase.rpc("record_rent_payment",{
+  const {data:paymentId,error}=await supabase.rpc("record_rent_payment",{
     p_organization_id:organization.id,p_tenant_id:value(data,"tenant_id"),
     p_lease_id:value(data,"lease_id")||null,p_amount_minor:amount,
     p_payment_method:value(data,"payment_method"),p_payment_reference:value(data,"payment_reference")||null,
@@ -83,7 +83,7 @@ export async function recordPayment(data: FormData) {
     p_notes:value(data,"notes")||null,p_allocations:allocations
   });
   if(error) redirect("/rent?error="+encodeURIComponent(error.message));
-  revalidatePath("/rent"); revalidatePath("/dashboard"); redirect("/rent?success=Payment%20recorded");
+  revalidatePath("/rent"); revalidatePath("/dashboard"); if(paymentId) redirect("/receipts/"+paymentId); redirect("/rent?success=Payment%20recorded");
 }
 
 export async function createExpense(data: FormData) {
