@@ -272,3 +272,14 @@
   .scroll-reveal.is-visible .showcase-card,.scroll-reveal.is-visible .landing-feature-card,.scroll-reveal.is-visible .landing-steps>div,.scroll-reveal.is-visible .pricing-card{animation:none!important}
   .landing-primary-cta,.landing-nav-cta,.landing-primary-cta span,.landing-nav-cta span{transition:none!important}
 }
+
+
+/* Mobile navigation remains available without crowding the hero. */
+@media(max-width:620px){
+  .landing-nav{height:auto;min-height:68px;flex-wrap:wrap;row-gap:10px;padding-top:12px;padding-bottom:12px}
+  .landing-nav-links{display:flex;order:3;flex:0 0 100%;justify-content:space-between;gap:10px}
+  .landing-nav-links a{font-size:10px;padding:4px 0}
+}
+.landing-nav a:focus-visible,.landing-footer a:focus-visible,.landing-hero a:focus-visible,.billing-switch button:focus-visible{
+  outline:3px solid #d18b42;outline-offset:3px;border-radius:5px
+}
