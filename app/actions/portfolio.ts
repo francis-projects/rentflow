@@ -108,3 +108,15 @@ export async function assignPropertyOwner(data: FormData) {
   if(error) redirect("/owners?error="+encodeURIComponent(error.message));
   revalidatePath("/owners"); redirect("/owners?success=Property%20ownership%20updated");
 }
+
+export async function reversePayment(data: FormData) {
+  const {supabase,organization}=await getWorkspaceContext();
+  const paymentId=value(data,"payment_id"), reason=value(data,"reason");
+  if(!paymentId||reason.length<5) redirect("/rent?error=Enter%20a%20clear%20reason%20for%20reversal");
+  const {error}=await supabase.rpc("reverse_rent_payment",{
+    p_organization_id:organization.id,p_payment_id:paymentId,p_reason:reason
+  });
+  if(error) redirect("/rent?error="+encodeURIComponent(error.message));
+  revalidatePath("/rent"); revalidatePath("/dashboard"); revalidatePath("/reports");
+  redirect("/rent?success=Payment%20reversed%20with%20audit%20record");
+}
