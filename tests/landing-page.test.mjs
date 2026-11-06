@@ -27,7 +27,7 @@ test("marketing layout includes responsive breakpoints and reduced-motion suppor
 });
 
 test("mobile landing navigation keeps section links available", () => {
-  assert.match(css, /@media\(max-width:620px\)[^}]*\.landing-nav-links\{display:flex/);
+  assert.match(css, /\.landing-nav-links\{display:flex;order:3;flex:0 0 100%/);
   assert.match(page, /href="#features"/);
   assert.match(page, /href="#how-it-works"/);
   assert.match(page, /href="#plans"/);
