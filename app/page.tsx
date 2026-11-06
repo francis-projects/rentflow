@@ -3,8 +3,6 @@ import { createClient } from "@/lib/supabase/server";
 import { PricingSection } from "@/components/pricing-section";
 import { ScrollReveal } from "@/components/scroll-reveal";
 
-const usd = (minor: number | null) => minor === null ? "Custom" : minor === 0 ? "$0" : "$" + new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(minor / 100);
-
 const features = [
   { number: "01", title: "Property & unit records", description: "Keep property details, rental units and occupancy information organised in one workspace." },
   { number: "02", title: "Tenants & leases", description: "Maintain tenant records, lease terms, rent amounts and due dates together." },
