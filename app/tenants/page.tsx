@@ -1,0 +1,10 @@
+import { createTenant } from "@/app/actions/portfolio";
+import { getWorkspaceContext } from "@/lib/rentflow/context";
+import { WorkspaceLayout } from "@/components/workspace-layout";
+export default async function TenantsPage({searchParams}:{searchParams:Promise<{error?:string;success?:string}>}) {
+ const {supabase,organization}=await getWorkspaceContext(); const [{data:tenants},params]=await Promise.all([supabase.from("tenants").select("*").eq("organization_id",organization.id).order("full_name"),searchParams]);
+ return <WorkspaceLayout workspaceName={organization.name}><div className="page-heading"><div><p className="eyebrow">PEOPLE</p><h1>Tenants</h1><p className="muted">Tenant contacts and emergency contact information.</p></div></div>
+ {params.error&&<p className="error-message">{params.error}</p>}{params.success&&<p className="success-message">{params.success}</p>}
+ <section className="panel"><h2>Register a tenant</h2><form action={createTenant} className="data-form"><div className="form-grid"><label>Full name<input name="full_name" required/></label><label>Email<input name="email" type="email"/></label><label>Phone<input name="phone" type="tel"/></label><label>Emergency contact name<input name="emergency_contact_name"/></label><label>Emergency contact phone<input name="emergency_contact_phone" type="tel"/></label></div><label>Notes<textarea name="notes" rows={2}/></label><button>Add tenant</button></form></section>
+ <section className="panel table-panel"><div className="section-heading"><h2>Tenant directory</h2><span>{tenants?.length??0} tenants</span></div>{!tenants?.length?<p className="empty-state">No tenants registered yet.</p>:<div className="table-wrap"><table><thead><tr><th>Tenant</th><th>Email</th><th>Phone</th><th>Emergency contact</th></tr></thead><tbody>{tenants.map(t=><tr key={t.id}><td><strong>{t.full_name}</strong></td><td>{t.email??"—"}</td><td>{t.phone??"—"}</td><td>{[t.emergency_contact_name,t.emergency_contact_phone].filter(Boolean).join(" · ")||"—"}</td></tr>)}</tbody></table></div>}</section></WorkspaceLayout>;
+}
