@@ -309,3 +309,19 @@ export async function recordLeaseInspection(data: FormData) {
  if(error) redirect("/leases?error="+encodeURIComponent(error.message));
  revalidatePath("/leases"); redirect("/leases?success=Inspection%20recorded%20and%20locked");
 }
+
+
+export async function uploadLeaseInspectionEvidence(data: FormData) {
+ const {supabase,organization,userId}=await getWorkspaceContext();
+ const inspectionId=value(data,"inspection_id"),file=data.get("evidence"),caption=value(data,"caption");
+ if(!(file instanceof File)||file.size===0||file.size>10*1024*1024||!["image/jpeg","image/png","application/pdf"].includes(file.type)) redirect("/leases?error=Choose%20a%20JPG,%20PNG%20or%20PDF%20file%20up%20to%2010MB");
+ const {data:inspection,error:readError}=await supabase.from("lease_inspections").select("id,completed").eq("id",inspectionId).eq("organization_id",organization.id).maybeSingle();
+ if(readError||!inspection||!inspection.completed) redirect("/leases?error=Evidence%20can%20only%20be%20attached%20to%20a%20completed%20inspection");
+ const safeName=file.name.replace(/[^a-zA-Z0-9._-]/g,"_").slice(-90)||"evidence";
+ const path=organization.id+"/"+inspectionId+"/"+crypto.randomUUID()+"-"+safeName;
+ const {error:uploadError}=await supabase.storage.from("lease-inspection-evidence").upload(path,file,{contentType:file.type,upsert:false});
+ if(uploadError) redirect("/leases?error="+encodeURIComponent(uploadError.message));
+ const {error}=await supabase.from("lease_inspection_evidence").insert({organization_id:organization.id,inspection_id:inspectionId,file_name:file.name,storage_path:path,content_type:file.type,size_bytes:file.size,caption,uploaded_by:userId});
+ if(error){await supabase.storage.from("lease-inspection-evidence").remove([path]);redirect("/leases?error="+encodeURIComponent(error.message));}
+ revalidatePath("/leases");redirect("/leases?success=Inspection%20evidence%20uploaded%20privately");
+}
