@@ -294,3 +294,18 @@ export async function markNotificationRead(data: FormData) {
   revalidatePath("/notifications");
   redirect("/notifications");
 }
+
+
+export async function recordLeaseInspection(data: FormData) {
+ const {supabase,organization,userId}=await getWorkspaceContext();
+ const leaseId=value(data,"lease_id"),type=value(data,"inspection_type");
+ const condition=value(data,"condition_notes"),inventory=value(data,"inventory_notes"),damage=value(data,"damage_notes");
+ if(!leaseId||!["move_in","move_out"].includes(type)||condition.length<10) redirect("/leases?error=Select%20a%20lease%20and%20provide%20meaningful%20condition%20notes");
+ const {data:lease,error:readError}=await supabase.from("leases").select("id,status").eq("id",leaseId).eq("organization_id",organization.id).maybeSingle();
+ if(readError||!lease) redirect("/leases?error=Lease%20not%20found");
+ if(type==="move_in"&&lease.status!=="active") redirect("/leases?error=Move-in%20inspection%20requires%20an%20active%20lease");
+ if(type==="move_out"&&!["ended","terminated"].includes(lease.status)) redirect("/leases?error=End%20the%20lease%20before%20recording%20the%20move-out%20inspection");
+ const {error}=await supabase.from("lease_inspections").insert({organization_id:organization.id,lease_id:leaseId,inspection_type:type,condition_notes:condition,inventory_notes:inventory,damage_notes:damage,completed:true,inspected_by:userId});
+ if(error) redirect("/leases?error="+encodeURIComponent(error.message));
+ revalidatePath("/leases"); redirect("/leases?success=Inspection%20recorded%20and%20locked");
+}
