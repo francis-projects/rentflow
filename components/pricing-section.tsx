@@ -6,13 +6,8 @@ import Link from "next/link";
 type Plan = {
   code: string;
   name: string;
-  description: string;
   monthly_price_minor: number | null;
   annual_price_minor: number | null;
-  max_properties: number | null;
-  max_units: number | null;
-  max_team_members: number | null;
-  features: Record<string, unknown> | null;
 };
 
 const formatUsd = (minor: number | null) => minor === null
@@ -68,7 +63,7 @@ export function PricingSection({ plans }: { plans: Plan[] }) {
             <article className={`pricing-card ${plan.code === "professional" ? "pricing-card-featured" : ""}`} key={plan.code}>
               {plan.code === "professional" && <span className="pricing-popular">MOST POPULAR</span>}
               <div className="pricing-card-title"><span>{plan.name}</span><span className="pricing-plan-mark">{plan.code === "enterprise" ? "↗" : plan.code === "free" ? "○" : "✳"}</span></div>
-              <p>{descriptions[plan.code] ?? plan.description}</p>
+              <p>{descriptions[plan.code] ?? "A flexible plan for your rental business."}</p>
               <div className="pricing-amount">
                 <strong>{custom ? "Let's talk" : formatUsd(price)}</strong>
                 {!custom && <span>/{interval === "annual" ? "year" : "month"}</span>}
