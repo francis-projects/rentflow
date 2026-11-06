@@ -33,9 +33,10 @@ export default async function IntelligencePage(){
  const currentMonth=(today.slice(0,7)+"-01");
  const monthCharges=(charges??[]).filter(c=>c.charge_period===currentMonth);
  const charged=monthCharges.reduce((s,c)=>s+Number(c.amount_minor),0);
+ const collectedAgainstMonthCharges=monthCharges.reduce((s,c)=>s+Math.min(Number(c.amount_minor),Number(c.paid_minor)),0);
  const paidThisMonth=(payments??[]).reduce((s,p)=>s+Number(p.amount_minor),0);
  const expensesThisMonth=(expenses??[]).reduce((s,e)=>s+Number(e.amount_minor),0);
- const collectionRate=charged>0?Math.min(100,Math.round(paidThisMonth/charged*100)):0;
+ const collectionRate=charged>0?Math.min(100,Math.round(collectedAgainstMonthCharges/charged*100)):0;
  const overdue=(charges??[]).filter(c=>c.due_date<today&&Number(c.balance_minor)>0);
  const overdueAmount=overdue.reduce((s,c)=>s+Number(c.balance_minor),0);
  const dueSoonEnd=new Date(`${today}T00:00:00Z`);
@@ -56,7 +57,7 @@ export default async function IntelligencePage(){
  const insights:{level:"warning"|"positive"|"info";title:string;body:string;action:string}[]=[];
  if(overdueAmount>0) insights.push({level:"warning",title:"Outstanding rent needs follow-up",body:`${overdue.length} rent charge(s) are overdue, totalling ${money(overdueAmount)}.`,action:"Review the rent ledger and follow up with affected tenants."});
  if(occupancy<85&&unitRows.length>0) insights.push({level:"warning",title:"Vacancy is reducing potential income",body:`${vacant} of ${unitRows.length} units are vacant. Current occupancy is ${occupancy}%.`,action:"Review vacant units, readiness and marketing activity."});
- if(collectionRate>0&&collectionRate<85) insights.push({level:"warning",title:"Current-month collections are below target",body:`${collectionRate}% of this month's rent charges have been collected based on posted payments received this month.`,action:"Prioritise reminders and reconcile unallocated payments."});
+ if(collectionRate>0&&collectionRate<85) insights.push({level:"warning",title:"Current-month collections are below target",body:`${collectionRate}% of this month's rent charges have been collected based on posted payment allocations applied to this month's charges.`,action:"Prioritise reminders and reconcile unallocated payments."});
  if(urgentMaintenance.length>0) insights.push({level:"warning",title:"High-priority maintenance is open",body:`${urgentMaintenance.length} high or urgent maintenance request(s) remain open.`,action:"Assign owners and due dates to the highest-priority jobs."});
  if(netCash<0) insights.push({level:"warning",title:"Recorded expenses exceed collections this month",body:`Recorded expenses exceed posted payment receipts by ${money(Math.abs(netCash))} so far this month.`,action:"Review upcoming costs and outstanding tenant balances."});
  if(dueSoon.length>0) insights.push({level:"info",title:"Rent falls due in the next seven days",body:`${dueSoon.length} outstanding charge(s) are due soon.`,action:"Check that tenants have received payment instructions."});
@@ -67,7 +68,7 @@ export default async function IntelligencePage(){
    <article className="intelligence-metric"><small>Properties</small><strong>{propertyCount}</strong><span>Active properties</span></article>
    <article className="intelligence-metric"><small>Occupancy</small><strong>{occupancy}%</strong><span>{occupied} occupied · {vacant} vacant</span></article>
    <article className="intelligence-metric"><small>Overdue rent</small><strong>{money(overdueAmount)}</strong><span>{overdue.length} overdue charge(s)</span></article>
-   <article className="intelligence-metric"><small>Collection rate</small><strong>{collectionRate}%</strong><span>Against charges raised this month</span></article>
+   <article className="intelligence-metric"><small>Charge collection rate</small><strong>{collectionRate}%</strong><span>Payments allocated to this month's charges</span></article>
    <article className="intelligence-metric"><small>Payments received</small><strong>{money(paidThisMonth)}</strong><span>Posted payments this month</span></article>
    <article className="intelligence-metric"><small>Recorded expenses</small><strong>{money(expensesThisMonth)}</strong><span>Expenses this month</span></article>
   </section>
@@ -77,6 +78,6 @@ export default async function IntelligencePage(){
   <section className="panel table-panel"><div className="section-heading"><h2>Overdue rent watchlist</h2><span>{overdue.length} charges</span></div>
    {!riskRows.length?<p className="empty-state">No overdue balances found in the current rent ledger.</p>:<div className="table-wrap"><table><thead><tr><th>Tenant</th><th>Property</th><th>Due date</th><th>Outstanding (UGX)</th></tr></thead><tbody>{riskRows.map(r=><tr key={r.id}><td><strong>{r.tenant}</strong></td><td>{r.property}</td><td>{r.due}</td><td><strong>{r.balance.toLocaleString("en-UG")}</strong></td></tr>)}</tbody></table></div>}
   </section>
-  <section className="panel intelligence-footnote"><strong>How these insights work</strong><p>These are explainable, rule-based indicators from your RentFlow records, not AI-generated advice. Collection rate uses posted payment receipts received during the month divided by rent charges raised for that month; payments allocated to earlier periods may affect this comparison. The AI narrative layer can be added once the model provider and credentials are configured.</p></section>
+  <section className="panel intelligence-footnote"><strong>How these insights work</strong><p>These are explainable, rule-based indicators from your RentFlow records, not AI-generated advice. Charge collection rate uses posted payment allocations applied to charges raised for the current month, divided by those charges. Cash received this month is shown separately and may include payments for earlier rent periods. The AI narrative layer can be added once the model provider and credentials are configured.</p></section>
  </WorkspaceLayout>;
 }
