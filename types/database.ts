@@ -157,6 +157,82 @@ export type Database = {
           },
         ]
       }
+      maintenance_requests: {
+        Row: {
+          assigned_to: string | null
+          category: string
+          completed_at: string | null
+          description: string | null
+          due_date: string | null
+          id: string
+          organization_id: string
+          priority: string
+          property_id: string
+          reported_at: string
+          reported_by: string
+          status: string
+          title: string
+          unit_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          category?: string
+          completed_at?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          organization_id: string
+          priority?: string
+          property_id: string
+          reported_at?: string
+          reported_by: string
+          status?: string
+          title: string
+          unit_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          category?: string
+          completed_at?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          organization_id?: string
+          priority?: string
+          property_id?: string
+          reported_at?: string
+          reported_by?: string
+          status?: string
+          title?: string
+          unit_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "maintenance_property_org_fk"
+            columns: ["property_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "maintenance_requests_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_unit_org_fk"
+            columns: ["unit_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
       organization_members: {
         Row: {
           created_at: string
