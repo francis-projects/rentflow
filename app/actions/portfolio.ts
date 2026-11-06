@@ -222,11 +222,21 @@ export async function allocateExpenseToProperty(data: FormData) {
  const {supabase,organization}=await getWorkspaceContext();
  const expenseId=value(data,"expense_id"),propertyId=value(data,"property_id"),amount=number(data,"amount_minor");
  if(!expenseId||!propertyId||!Number.isSafeInteger(amount)||amount<=0) redirect("/expenses?error=Enter%20a%20valid%20expense%20allocation");
+ const [{data:expense,error:expenseError},{data:property,error:propertyError},{data:existing,error:allocationError}]=await Promise.all([
+  supabase.from("expenses").select("id,amount_minor,property_id,unit_id,status").eq("id",expenseId).eq("organization_id",organization.id).maybeSingle(),
+  supabase.from("properties").select("id").eq("id",propertyId).eq("organization_id",organization.id).maybeSingle(),
+  supabase.from("expense_allocations").select("amount_minor").eq("expense_id",expenseId).eq("organization_id",organization.id)
+ ]);
+ if(expenseError||!expense||expense.status!=="recorded") redirect("/expenses?error=Select%20a%20recorded%20expense");
+ if(expense.property_id||expense.unit_id) redirect("/expenses?error=Only%20portfolio-wide%20expenses%20can%20be%20allocated");
+ if(propertyError||!property) redirect("/expenses?error=Select%20a%20valid%20property");
+ if(allocationError) redirect("/expenses?error=Could%20not%20verify%20existing%20allocations");
+ const alreadyAllocated=(existing??[]).reduce((sum,item)=>sum+Number(item.amount_minor),0);
+ if(alreadyAllocated+amount>Number(expense.amount_minor)) redirect("/expenses?error=Allocations%20cannot%20exceed%20the%20remaining%20expense%20amount");
  const {error}=await supabase.from("expense_allocations").insert({organization_id:organization.id,expense_id:expenseId,property_id:propertyId,amount_minor:amount});
  if(error) redirect("/expenses?error="+encodeURIComponent(error.message));
  revalidatePath("/expenses"); revalidatePath("/owners"); revalidatePath("/reports"); redirect("/expenses?success=Expense%20allocated%20to%20property");
 }
-
 export async function recordOwnerPayout(data: FormData) {
  const {supabase,organization,userId}=await getWorkspaceContext();
  await requirePlanFeature(supabase, organization.id, "owner_payouts");
