@@ -8,7 +8,8 @@ const featureLabels: Record<string,string> = {
  automated_reminders:"Automated rent reminders",ai_insights:"AI portfolio insights",priority_support:"Priority support"
 };
 const limitLabel=(value:number|null)=>value===null?"Unlimited":String(value);
-const currency=(amount:number|null)=>amount===null?"Contact us":amount===0?"Free": "USD "+new Intl.NumberFormat("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}).format(amount/100);
+const currency=(amount:number|null)=>amount===null?"Custom":amount===0?"Free": "$"+new Intl.NumberFormat("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}).format(amount/100);
+const annualSaving=(monthly:number|null,annual:number|null)=>monthly===null||annual===null?null:monthly*12-annual;
 
 export default async function SubscriptionPage({searchParams}:{searchParams:Promise<{error?:string;success?:string}>}) {
  const {supabase,organization,membership}=await getWorkspaceContext();
@@ -36,7 +37,8 @@ export default async function SubscriptionPage({searchParams}:{searchParams:Prom
    return <article className={"plan-card "+(isCurrent?"plan-current":"")} key={plan.id}>
     <div className="plan-card-top"><div><p className="eyebrow">{plan.code.toUpperCase()}</p><h3>{plan.name}</h3></div>{isCurrent&&<span className="status-pill">Current</span>}</div>
     <p className="plan-description">{plan.description}</p>
-    <div className="plan-price">{currency(plan.monthly_price_minor)}<small>{plan.monthly_price_minor===0?"/ month":plan.monthly_price_minor===null?" pricing pending":"/ month"}</small></div>
+    <div className="plan-price">{currency(plan.monthly_price_minor)}<small>{plan.monthly_price_minor===0?"/ month":plan.monthly_price_minor===null?" pricing":"/ month"}</small></div>
+    <div className="plan-annual-price"><strong>{currency(plan.annual_price_minor)}{plan.annual_price_minor!==null&&plan.annual_price_minor!==0?"/ year":""}</strong>{annualSaving(plan.monthly_price_minor,plan.annual_price_minor)!==null&&annualSaving(plan.monthly_price_minor,plan.annual_price_minor)!==0&&<small>Save {currency(annualSaving(plan.monthly_price_minor,plan.annual_price_minor))} with annual billing</small>}</div>
     <div className="plan-limits"><div><strong>{limitLabel(plan.max_properties)}</strong><small>Properties</small></div><div><strong>{limitLabel(plan.max_units)}</strong><small>Units</small></div><div><strong>{limitLabel(plan.max_team_members)}</strong><small>Team members</small></div></div>
     <div className="plan-feature-list">{features.map(([key])=><div key={key}><span>✓</span>{featureLabels[key]??key.replaceAll("_"," ")}</div>)}</div>
     {canRequest&&!isCurrent&&!pending&&<form action={requestPlanChange} className="plan-request-form">
