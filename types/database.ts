@@ -660,6 +660,63 @@ export type Database = {
           },
         ]
       }
+      tenant_documents: {
+        Row: {
+          content_type: string
+          document_type: string
+          file_name: string
+          id: string
+          notes: string | null
+          organization_id: string
+          size_bytes: number
+          storage_path: string
+          tenant_id: string
+          uploaded_at: string
+          uploaded_by: string
+        }
+        Insert: {
+          content_type: string
+          document_type?: string
+          file_name: string
+          id?: string
+          notes?: string | null
+          organization_id: string
+          size_bytes: number
+          storage_path: string
+          tenant_id: string
+          uploaded_at?: string
+          uploaded_by: string
+        }
+        Update: {
+          content_type?: string
+          document_type?: string
+          file_name?: string
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          size_bytes?: number
+          storage_path?: string
+          tenant_id?: string
+          uploaded_at?: string
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_documents_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tenant_documents_tenant_org_fk"
+            columns: ["tenant_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
       tenants: {
         Row: {
           created_at: string
