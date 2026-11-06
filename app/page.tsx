@@ -103,7 +103,7 @@ export default async function HomePage() {
         </div>
       </section></ScrollReveal>
 
-      <PricingSection plans={plans ?? []} />
+      <ScrollReveal><PricingSection plans={plans ?? []} /></ScrollReveal>
 
 
 
