@@ -1,5 +1,6 @@
 import { getWorkspaceContext } from "@/lib/rentflow/context";
 import { WorkspaceLayout } from "@/components/workspace-layout";
+import { getWorkspacePlan } from "@/lib/rentflow/entitlements";
 import { updateOrganisationMemberRole, removeOrganisationMember } from "@/app/actions/portfolio";
 
 const roleLabels: Record<string,string> = {
@@ -8,11 +9,13 @@ const roleLabels: Record<string,string> = {
 
 export default async function TeamPage({searchParams}:{searchParams:Promise<{error?:string;success?:string}>}) {
  const {supabase,organization,membership,userId}=await getWorkspaceContext();
+ const plan=await getWorkspacePlan(supabase,organization.id);
+ const teamEnabled=(plan?.features as Record<string,unknown>|null)?.team_management===true;
  const [{data:members},params]=await Promise.all([
   supabase.from("organization_members").select("id,user_id,role,created_at").eq("organization_id",organization.id).order("created_at"),
   searchParams
  ]);
- const canManage=membership.role==="owner"||membership.role==="admin";
+ const canManage=(membership.role==="owner"||membership.role==="admin")&&teamEnabled;
  return <WorkspaceLayout workspaceName={organization.name}>
   <div className="page-heading"><div><p className="eyebrow">WORKSPACE ACCESS</p><h1>Team members</h1><p className="muted">Manage who can access this rental workspace and the level of access they have.</p></div></div>
   {params.error&&<p className="error-message">{params.error}</p>}{params.success&&<p className="success-message">{params.success}</p>}
